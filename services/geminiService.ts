@@ -1,3 +1,4 @@
+
 import { GoogleGenAI, Type } from "@google/genai";
 import { AssessmentData, CareerResponse } from "../types";
 
@@ -203,7 +204,14 @@ export const generateCareerGuidance = async (data: AssessmentData): Promise<Care
     }
 
     const cleanJson = cleanJsonString(response.text);
-    return JSON.parse(cleanJson) as CareerResponse;
+    const result = JSON.parse(cleanJson) as CareerResponse;
+
+    // Additional safety: ensure recommendations is an array
+    if (!result.recommendations || !Array.isArray(result.recommendations)) {
+      result.recommendations = [];
+    }
+
+    return result;
 
   } catch (error: any) {
     console.error("Gemini API Error:", error);

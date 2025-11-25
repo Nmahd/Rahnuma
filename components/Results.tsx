@@ -4,17 +4,13 @@ import { CareerRecommendation, CareerResponse, University } from '../types';
 import { 
   MapPin, 
   GraduationCap, 
-  Briefcase, 
   Award, 
   ChevronDown, 
   ChevronUp, 
   ExternalLink, 
   Clock, 
   DollarSign, 
-  BookOpen, 
   Trophy, 
-  Monitor, 
-  BarChart, 
   PlusCircle, 
   CheckCircle2,
   TrendingUp,
@@ -50,6 +46,8 @@ const Results: React.FC<ResultsProps> = ({ data, onReset }) => {
     });
   };
 
+  const recommendations = data.recommendations || [];
+
   return (
     <div className="max-w-4xl mx-auto space-y-12 animate-fadeIn pb-24">
       {/* Header Analysis */}
@@ -64,7 +62,7 @@ const Results: React.FC<ResultsProps> = ({ data, onReset }) => {
            </div>
         </div>
         <div className="prose prose-slate max-w-none text-slate-600 leading-relaxed text-lg">
-          <p>{data.analysis}</p>
+          <p>{data.analysis || "Here is your personalized career analysis based on the details you provided."}</p>
         </div>
       </div>
 
@@ -72,15 +70,21 @@ const Results: React.FC<ResultsProps> = ({ data, onReset }) => {
         <h3 className="text-xl font-bold text-slate-900 mb-6 px-1 uppercase tracking-wider text-sm text-slate-500">Your Top Recommendations</h3>
         {/* Career Cards */}
         <div className="space-y-6">
-          {data.recommendations.map((career, idx) => (
-            <CareerCard 
-              key={idx} 
-              career={career} 
-              index={idx + 1} 
-              comparisonList={comparisonList}
-              onToggleCompare={toggleCompare}
-            />
-          ))}
+          {recommendations.length > 0 ? (
+            recommendations.map((career, idx) => (
+              <CareerCard 
+                key={idx} 
+                career={career} 
+                index={idx + 1} 
+                comparisonList={comparisonList}
+                onToggleCompare={toggleCompare}
+              />
+            ))
+          ) : (
+            <div className="text-center p-8 bg-white rounded-2xl border border-slate-200">
+              <p className="text-slate-500">No recommendations found. Please try again.</p>
+            </div>
+          )}
         </div>
       </div>
 
@@ -197,11 +201,15 @@ const UniversityCard: React.FC<{
              <div>
                 <h5 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Recommended Programs</h5>
                 <div className="flex flex-wrap gap-2">
-                   {uni.recommendedPrograms && uni.recommendedPrograms.map((prog, idx) => (
-                     <span key={idx} className="text-sm bg-white border border-slate-200 px-3 py-1 rounded-md text-slate-700">
-                       {prog}
-                     </span>
-                   ))}
+                   {uni.recommendedPrograms && uni.recommendedPrograms.length > 0 ? (
+                     uni.recommendedPrograms.map((prog, idx) => (
+                       <span key={idx} className="text-sm bg-white border border-slate-200 px-3 py-1 rounded-md text-slate-700">
+                         {prog}
+                       </span>
+                     ))
+                   ) : (
+                      <span className="text-sm text-slate-500 italic">General programs available</span>
+                   )}
                 </div>
              </div>
 
@@ -239,6 +247,13 @@ const CareerCard: React.FC<{
   onToggleCompare: (uni: University) => void
 }> = ({ career, index, comparisonList, onToggleCompare }) => {
   const [expanded, setExpanded] = useState(index === 1);
+  
+  // Safe defaults
+  const roadmap = career.roadmap || [];
+  const universities = career.universities || [];
+  const shortCourses = career.shortCourses || [];
+  const youtubeCourses = career.youtubeCourses || [];
+  const roleModels = career.roleModels || [];
 
   return (
     <div className={`bg-white rounded-2xl shadow-sm border overflow-hidden transition-all duration-300 ${expanded ? 'border-brand-200 shadow-md' : 'border-slate-200'}`}>
@@ -310,12 +325,16 @@ const CareerCard: React.FC<{
                 <MapPin size={20} className="mr-2 text-brand-500" /> Career Roadmap
               </h4>
               <div className="relative border-l-2 border-slate-200 ml-2.5 space-y-6 pb-2">
-                {career.roadmap.map((step, i) => (
-                  <div key={i} className="relative pl-8">
-                    <span className="absolute -left-[9px] top-1.5 w-4 h-4 rounded-full bg-white border-4 border-slate-300"></span>
-                    <p className="text-base text-slate-700">{step}</p>
-                  </div>
-                ))}
+                {roadmap.length > 0 ? (
+                  roadmap.map((step, i) => (
+                    <div key={i} className="relative pl-8">
+                      <span className="absolute -left-[9px] top-1.5 w-4 h-4 rounded-full bg-white border-4 border-slate-300"></span>
+                      <p className="text-base text-slate-700">{step}</p>
+                    </div>
+                  ))
+                ) : (
+                  <p className="text-sm text-slate-400 italic pl-6">No specific roadmap available.</p>
+                )}
               </div>
             </div>
 
@@ -334,14 +353,18 @@ const CareerCard: React.FC<{
                   <GraduationCap size={20} className="mr-2 text-purple-600" /> Education
                 </h4>
                 <div className="space-y-3">
-                  {career.universities.map((uni, i) => (
-                    <UniversityCard 
-                      key={i} 
-                      uni={uni} 
-                      isSelected={comparisonList.some(u => u.name === uni.name)}
-                      onToggleCompare={onToggleCompare}
-                    />
-                  ))}
+                  {universities.length > 0 ? (
+                    universities.map((uni, i) => (
+                      <UniversityCard 
+                        key={i} 
+                        uni={uni} 
+                        isSelected={comparisonList.some(u => u.name === uni.name)}
+                        onToggleCompare={onToggleCompare}
+                      />
+                    ))
+                  ) : (
+                    <p className="text-sm text-slate-400 italic">No university recommendations available.</p>
+                  )}
                 </div>
               </div>
 
@@ -351,7 +374,7 @@ const CareerCard: React.FC<{
                   <Award size={20} className="mr-2 text-orange-500" /> Short Courses
                 </h4>
                 <div className="space-y-3">
-                  {career.shortCourses.map((course, i) => (
+                  {shortCourses.map((course, i) => (
                     <div key={i} className="bg-white p-4 rounded-xl border border-slate-200 hover:border-orange-200 transition-colors">
                         <div className="flex justify-between items-start">
                           <h5 className="font-bold text-slate-800 text-base">{course.name}</h5>
@@ -381,7 +404,7 @@ const CareerCard: React.FC<{
                         )}
                     </div>
                   ))}
-                  {career.shortCourses.length === 0 && (
+                  {shortCourses.length === 0 && (
                     <div className="p-4 text-center text-sm text-slate-400 bg-slate-50 rounded-xl border border-dashed border-slate-200">
                       No short courses found.
                     </div>
@@ -398,25 +421,26 @@ const CareerCard: React.FC<{
                     <Youtube size={20} className="mr-2 text-red-600" /> Free YouTube Courses
                   </h4>
                   <div className="space-y-3">
-                     {career.youtubeCourses && career.youtubeCourses.map((yt, i) => (
-                       <a 
-                         key={i} 
-                         href={yt.url}
-                         target="_blank" 
-                         rel="noopener noreferrer"
-                         className="flex items-center p-3 bg-white rounded-xl border border-slate-200 hover:border-red-200 hover:shadow-sm transition group"
-                       >
-                         <div className="w-10 h-10 rounded-full bg-red-50 flex items-center justify-center text-red-600 flex-shrink-0 mr-3 group-hover:bg-red-600 group-hover:text-white transition-colors">
-                            <Youtube size={20} />
-                         </div>
-                         <div>
-                            <h5 className="text-sm font-bold text-slate-800 group-hover:text-red-700">{yt.title}</h5>
-                            <p className="text-xs text-slate-500">{yt.channelName}</p>
-                         </div>
-                         <ExternalLink size={14} className="ml-auto text-slate-300 group-hover:text-red-400" />
-                       </a>
-                     ))}
-                     {(!career.youtubeCourses || career.youtubeCourses.length === 0) && (
+                     {youtubeCourses.length > 0 ? (
+                       youtubeCourses.map((yt, i) => (
+                         <a 
+                           key={i} 
+                           href={yt.url}
+                           target="_blank" 
+                           rel="noopener noreferrer"
+                           className="flex items-center p-3 bg-white rounded-xl border border-slate-200 hover:border-red-200 hover:shadow-sm transition group"
+                         >
+                           <div className="w-10 h-10 rounded-full bg-red-50 flex items-center justify-center text-red-600 flex-shrink-0 mr-3 group-hover:bg-red-600 group-hover:text-white transition-colors">
+                              <Youtube size={20} />
+                           </div>
+                           <div>
+                              <h5 className="text-sm font-bold text-slate-800 group-hover:text-red-700">{yt.title}</h5>
+                              <p className="text-xs text-slate-500">{yt.channelName}</p>
+                           </div>
+                           <ExternalLink size={14} className="ml-auto text-slate-300 group-hover:text-red-400" />
+                         </a>
+                       ))
+                     ) : (
                         <p className="text-sm text-slate-400 italic">No specific YouTube courses suggested.</p>
                      )}
                   </div>
@@ -428,19 +452,20 @@ const CareerCard: React.FC<{
                     <Star size={20} className="mr-2 text-yellow-500" /> Role Models
                   </h4>
                   <div className="space-y-3">
-                     {career.roleModels && career.roleModels.map((person, i) => (
-                       <div key={i} className="flex items-start p-3 bg-slate-50 rounded-xl border border-slate-100">
-                          <div className="w-10 h-10 rounded-full bg-yellow-100 flex items-center justify-center text-yellow-600 flex-shrink-0 mr-3">
-                             <Users size={20} />
-                          </div>
-                          <div>
-                             <h5 className="text-sm font-bold text-slate-800">{person.name}</h5>
-                             <p className="text-xs font-semibold text-slate-600">{person.role}</p>
-                             <p className="text-xs text-slate-500 mt-1 italic">"{person.context}"</p>
-                          </div>
-                       </div>
-                     ))}
-                     {(!career.roleModels || career.roleModels.length === 0) && (
+                     {roleModels.length > 0 ? (
+                       roleModels.map((person, i) => (
+                         <div key={i} className="flex items-start p-3 bg-slate-50 rounded-xl border border-slate-100">
+                            <div className="w-10 h-10 rounded-full bg-yellow-100 flex items-center justify-center text-yellow-600 flex-shrink-0 mr-3">
+                               <Users size={20} />
+                            </div>
+                            <div>
+                               <h5 className="text-sm font-bold text-slate-800">{person.name}</h5>
+                               <p className="text-xs font-semibold text-slate-600">{person.role}</p>
+                               <p className="text-xs text-slate-500 mt-1 italic">"{person.context}"</p>
+                            </div>
+                         </div>
+                       ))
+                     ) : (
                         <p className="text-sm text-slate-400 italic">No specific role models found.</p>
                      )}
                   </div>
