@@ -193,7 +193,7 @@ const App: React.FC = () => {
                <p className="text-sm text-slate-500 mt-2">Empowering Pakistani Youth.</p>
             </div>
             <div className="text-sm text-slate-400">
-              © {new Date().getFullYear()} Rahnuma. Powered by Google Gemini.
+              © {new Date().getFullYear()} Rahnuma. Made with love by Naeem Ahmed.
             </div>
          </div>
       </footer>
