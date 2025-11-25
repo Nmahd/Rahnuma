@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Compass, Loader2, LogOut, User as UserIcon } from 'lucide-react';
 import { AppView, AssessmentData, CareerResponse, User } from './types';
@@ -12,6 +11,7 @@ const App: React.FC = () => {
   const [results, setResults] = useState<CareerResponse | null>(null);
   const [loading, setLoading] = useState(false);
   const [user, setUser] = useState<User | null>(null);
+  const [errorMsg, setErrorMsg] = useState<string>('');
 
   const handleStart = () => {
     if (!user) {
@@ -35,12 +35,14 @@ const App: React.FC = () => {
   const handleAssessmentSubmit = async (data: AssessmentData) => {
     setLoading(true);
     setView(AppView.LOADING);
+    setErrorMsg('');
     try {
       const response = await generateCareerGuidance(data);
       setResults(response);
       setView(AppView.RESULTS);
-    } catch (error) {
+    } catch (error: any) {
       console.error(error);
+      setErrorMsg(error.message || "An unexpected error occurred.");
       setView(AppView.ERROR);
     } finally {
       setLoading(false);
@@ -166,12 +168,21 @@ const App: React.FC = () => {
         )}
 
         {view === AppView.ERROR && (
-          <div className="min-h-[60vh] flex flex-col items-center justify-center px-4">
+          <div className="min-h-[60vh] flex flex-col items-center justify-center px-4 max-w-lg mx-auto text-center">
             <div className="bg-red-50 p-4 rounded-full mb-4">
                <Compass className="h-12 w-12 text-red-500" />
             </div>
             <h3 className="text-xl font-semibold text-slate-900">Something went wrong</h3>
-            <p className="text-slate-500 mt-2 text-center max-w-md mb-6">We couldn't generate your recommendations at this moment. Please check your internet or try again.</p>
+            
+            {/* Display specific error message */}
+            <div className="mt-4 p-4 bg-red-50 rounded-lg border border-red-100 text-left w-full">
+              <p className="text-sm font-bold text-red-800 mb-1">Error Details:</p>
+              <p className="text-sm text-red-600 font-mono break-words">{errorMsg}</p>
+            </div>
+
+            <p className="text-slate-500 mt-4 text-center mb-6">
+              Please check your internet connection or try again later.
+            </p>
             <button 
               onClick={() => setView(AppView.ASSESSMENT)}
               className="px-6 py-2 bg-slate-900 text-white rounded-lg hover:bg-slate-800 transition"

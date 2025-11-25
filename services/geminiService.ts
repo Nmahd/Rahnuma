@@ -10,25 +10,35 @@ const getApiKey = () => {
     return import.meta.env.VITE_API_KEY;
   }
   
-  // 2. Try Standard process.env (Node/CRA/Next.js)
+  // 2. Try Standard process.env (Node/CRA/Next.js) - fallback
   if (typeof process !== 'undefined' && process.env) {
-    // Check for standard generic, CRA, or Next.js prefixes
     return process.env.API_KEY || process.env.REACT_APP_API_KEY || process.env.NEXT_PUBLIC_API_KEY;
   }
   
   return '';
 };
 
-const apiKey = getApiKey();
-
-if (!apiKey) {
-  console.error("API Key is missing! Please set VITE_API_KEY in your environment variables.");
-}
-
-// Initialize Gemini Client
-const ai = new GoogleGenAI({ apiKey: apiKey });
+// Clean JSON string if it contains Markdown code blocks
+const cleanJsonString = (text: string) => {
+  let clean = text.trim();
+  if (clean.startsWith('```json')) {
+    clean = clean.replace(/^```json\s*/, '').replace(/\s*```$/, '');
+  } else if (clean.startsWith('```')) {
+    clean = clean.replace(/^```\s*/, '').replace(/\s*```$/, '');
+  }
+  return clean;
+};
 
 export const generateCareerGuidance = async (data: AssessmentData): Promise<CareerResponse> => {
+  const apiKey = getApiKey();
+
+  if (!apiKey) {
+    throw new Error("Configuration Error: API Key is missing. Please ensure 'VITE_API_KEY' is set in your Netlify environment variables and trigger a new deploy.");
+  }
+
+  // Initialize Gemini Client
+  const ai = new GoogleGenAI({ apiKey: apiKey });
+
   try {
     const prompt = `
       Act as an expert career counselor for a student in Pakistan.
@@ -189,13 +199,20 @@ export const generateCareerGuidance = async (data: AssessmentData): Promise<Care
     });
 
     if (!response.text) {
-      throw new Error("No response generated");
+      throw new Error("No response generated from AI.");
     }
 
-    return JSON.parse(response.text) as CareerResponse;
+    const cleanJson = cleanJsonString(response.text);
+    return JSON.parse(cleanJson) as CareerResponse;
 
-  } catch (error) {
+  } catch (error: any) {
     console.error("Gemini API Error:", error);
+    
+    // Provide more user-friendly error messages
+    if (error.message?.includes("API Key")) {
+      throw new Error("API Key is invalid or missing. Please check your Netlify configuration.");
+    }
+    
     throw error;
   }
 };
