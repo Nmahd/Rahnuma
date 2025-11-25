@@ -68,7 +68,8 @@ export const generateCareerGuidance = async (data: AssessmentData): Promise<Care
       2. A match score (0-100) based on their interests.
       3. A description of why this fits.
       4. A step-by-step roadmap (education + skills) suitable for the Pakistani context.
-      5. Top universities in Pakistan fitting the budget. Must include:
+      5. **Required Skills**: List 5 specific technical or soft skills they need to master for this career.
+      6. Top universities in Pakistan fitting the budget. Must include:
          - Name (e.g., NUST, LUMS, UET, IBA).
          - City.
          - Sector (Public/Private).
@@ -77,7 +78,7 @@ export const generateCareerGuidance = async (data: AssessmentData): Promise<Care
          - Approximate Ranking or Tier (e.g., "Top 5 in Pakistan", "Tier 1", "Best for CS in ${data.city}").
          - Recommended Programs: List 2-3 specific degree titles they should apply for (e.g., "BS Software Engineering", "BBA").
          - Key Subjects: A brief list of 3-5 core subjects they will study (e.g., "Programming, Calculus, Algorithms").
-      6. Specific short courses or vocational training (e.g., Digiskills, NAVTTC, Coursera, Udemy). Must include:
+      7. Specific short courses or vocational training (e.g., Digiskills, NAVTTC, Coursera, Udemy). Must include:
          - Course Name.
          - Provider/Platform.
          - Duration.
@@ -86,18 +87,18 @@ export const generateCareerGuidance = async (data: AssessmentData): Promise<Care
          - Link (URL to the course or provider home page).
          - Format (Online / On-site / Hybrid).
          - Difficulty Level (Beginner / Intermediate / Advanced).
-      7. **Free YouTube Learning**: Suggest 2-3 specific FREE courses or playlists on YouTube.
+      8. **Free YouTube Learning**: Suggest 2-3 specific FREE courses or playlists on YouTube.
          - Title of the series/playlist.
          - Channel Name (e.g., "CodeWithHarry", "GFXMentor", "Azad Chaiwala").
          - URL (link to the channel or playlist).
-      8. **Inspiration & Role Models**: Suggest 2 famous personalities (Pakistani or Global) in this field.
+      9. **Inspiration & Role Models**: Suggest 2 famous personalities (Pakistani or Global) in this field.
          - Name.
          - Role/Title (e.g., "CEO of Netsol", "Founder of Tesla").
          - Context (1 sentence on why they are a role model for this specific career).
-      9. Freelancing potential (Upwork/Fiverr demand) or remote work opportunities.
-      10. Estimated entry-level monthly salary range in PKR.
-      11. **Numeric Salary Data**: Provide 'salaryMin' and 'salaryMax' as numbers (e.g., 50000 and 80000).
-      12. **Market Demand Score**: A score from 0-100.
+      10. Freelancing potential (Upwork/Fiverr demand) or remote work opportunities.
+      11. Estimated entry-level monthly salary range in PKR.
+      12. **Numeric Salary Data**: Provide 'salaryMin' and 'salaryMax' as numbers (e.g., 50000 and 80000).
+      13. **Market Demand Score**: A score from 0-100.
 
       Also provide a short overall analysis of the profile.
     `;
@@ -125,6 +126,11 @@ export const generateCareerGuidance = async (data: AssessmentData): Promise<Care
                   roadmap: {
                     type: Type.ARRAY,
                     items: { type: Type.STRING }
+                  },
+                  skills: {
+                    type: Type.ARRAY,
+                    items: { type: Type.STRING },
+                    description: "List of key skills required for this career"
                   },
                   universities: {
                     type: Type.ARRAY,

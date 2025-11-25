@@ -39,49 +39,74 @@ export const SUBJECT_OPTIONS: Record<string, string[]> = {
   "Class 9-10 (Matric/O-Levels)": [
     "Science (Biology)",
     "Science (Computer Science)",
-    "Arts / Humanities"
+    "Arts / Humanities",
+    "Technical Group"
   ],
   "Class 11-12 (Inter/A-Levels)": [
     "Pre-Engineering",
     "Pre-Medical",
     "ICS (Computer Science)",
     "I.Com (Commerce)",
-    "FA (Arts / Humanities)"
+    "FA (Arts / Humanities)",
+    "FA (General Science)",
+    "A-Levels (Science)",
+    "A-Levels (Business/Humanities)"
   ],
   "Undergraduate (University)": [
-    "Electrical Engineering",
-    "Electronics Engineering",
-    "Mechanical Engineering",
-    "Civil Engineering",
-    "Computer Science (CS)",
-    "Software Engineering",
-    "Artificial Intelligence",
-    "Medical (MBBS/BDS)",
-    "Business Administration (BBA)",
-    "Accounting & Finance",
-    "Social Sciences / Psychology",
+    "Computer Science (CS) / SE / IT",
+    "Artificial Intelligence / Data Science",
+    "Electrical / Electronics Engineering",
+    "Mechanical / Mechatronics Engineering",
+    "Civil / Urban Engineering",
+    "Chemical / Materials Engineering",
+    "Medical (MBBS / BDS)",
+    "Pharmacy (Pharm-D)",
+    "Physiotherapy (DPT) / Allied Health",
+    "Business Admin (BBA) / Management",
+    "Accounting & Finance (BS / CA / ACCA)",
+    "Economics",
+    "Psychology / Sociology",
+    "International Relations (IR) / Pol Science",
+    "Mass Communication / Media Studies",
     "Law (LLB)",
-    "Fine Arts / Design"
+    "Fine Arts / Textile Design / Architecture",
+    "English Literature / Linguistics",
+    "Agriculture / Food Science",
+    "Biotechnology / Microbiology",
+    "Environmental Science",
+    "Mathematics / Statistics / Physics"
   ],
   "Graduated": [
-    "Electrical / Electronics Engineering",
-    "Mechanical / Civil Engineering",
-    "Computer Science / IT",
-    "Data Science / AI",
-    "Business / MBA",
-    "Medical / Health Sciences",
-    "Social Sciences",
-    "English / Literature",
-    "Pure Sciences (Physics, Chem, Bio)"
+    "Computer Science / AI / Cyber Security",
+    "Engineering (Electrical/Mech/Civil)",
+    "Business Administration (MBA)",
+    "Project Management",
+    "Marketing / Digital Marketing",
+    "Finance / Fintech",
+    "Human Resource Management (HRM)",
+    "Supply Chain Management",
+    "Medical / Public Health",
+    "Education / Teaching",
+    "English / Applied Linguistics",
+    "International Relations / Diplomacy",
+    "Psychology (Clinical/Org)",
+    "Data Science / Analytics",
+    "Agriculture / Agribusiness",
+    "Law (LLM)",
+    "Natural Sciences (Bio/Chem/Phy)"
   ],
   "Diploma / Vocational": [
     "DAE (Civil)",
     "DAE (Electrical)",
     "DAE (Mechanical)",
-    "Information Technology",
-    "Fashion Design",
-    "Graphic Design",
-    "Culinary Arts"
+    "DAE (Electronics)",
+    "Information Technology (CIT)",
+    "Web Development / Graphics",
+    "Fashion / Textile Design",
+    "Culinary Arts / Hotel Management",
+    "Auto Mechanic / HVAC",
+    "Electrician / Plumbing",
+    "Beautician / Cosmetology"
   ]
 };
 
@@ -94,7 +119,7 @@ export const WORK_PREFERENCES = [
 ];
 
 export const CITIES_PAKISTAN = [
-  "Karachi", "Lahore", "Islamabad", "Rawalpindi", "Faisalabad", "Multan", "Peshawar", "Quetta", "Sialkot", "Hyderabad", "Gujranwala", "Abbottabad", "Other"
+  "Karachi", "Lahore", "Islamabad", "Rawalpindi", "Faisalabad", "Multan", "Peshawar", "Quetta", "Sialkot", "Hyderabad", "Gujranwala", "Abbottabad", "Sargodha", "Bahawalpur", "Other"
 ];
 
 export const BUDGET_RANGES = [

@@ -50,6 +50,7 @@ export interface CareerRecommendation {
   matchScore: number; // 0-100
   description: string;
   roadmap: string[];
+  skills: string[]; // New field for specific skills
   universities: University[];
   shortCourses: ShortCourse[]; 
   youtubeCourses: YoutubeResource[];

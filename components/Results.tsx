@@ -18,7 +18,8 @@ import {
   Globe,
   Youtube,
   Star,
-  Users
+  Users,
+  Lightbulb
 } from 'lucide-react';
 import UniversityComparison from './UniversityComparison';
 
@@ -46,7 +47,7 @@ const Results: React.FC<ResultsProps> = ({ data, onReset }) => {
     });
   };
 
-  const recommendations = data.recommendations || [];
+  const recommendations = data?.recommendations || [];
 
   return (
     <div className="max-w-4xl mx-auto space-y-12 animate-fadeIn pb-24">
@@ -62,7 +63,7 @@ const Results: React.FC<ResultsProps> = ({ data, onReset }) => {
            </div>
         </div>
         <div className="prose prose-slate max-w-none text-slate-600 leading-relaxed text-lg">
-          <p>{data.analysis || "Here is your personalized career analysis based on the details you provided."}</p>
+          <p>{data?.analysis || "Here is your personalized career analysis based on the details you provided."}</p>
         </div>
       </div>
 
@@ -258,6 +259,7 @@ const CareerCard: React.FC<{
   
   // Safe defaults
   const roadmap = career.roadmap || [];
+  const skills = career.skills || [];
   const universities = career.universities || [];
   const shortCourses = career.shortCourses || [];
   const youtubeCourses = career.youtubeCourses || [];
@@ -327,8 +329,25 @@ const CareerCard: React.FC<{
           <div className="border-t border-slate-100 my-6"></div>
           
           <div className="space-y-10">
-            {/* Roadmap */}
+            {/* Skills & Roadmap */}
             <div>
+              <div className="mb-6">
+                <h4 className="flex items-center text-lg font-bold text-slate-900 mb-4">
+                  <Lightbulb size={20} className="mr-2 text-yellow-500" /> Top Skills You Need
+                </h4>
+                <div className="flex flex-wrap gap-2">
+                  {skills.length > 0 ? (
+                    skills.map((skill, i) => (
+                      <span key={i} className="px-3 py-1.5 bg-yellow-50 text-yellow-800 text-sm font-semibold rounded-lg border border-yellow-100">
+                        {skill}
+                      </span>
+                    ))
+                  ) : (
+                    <span className="text-sm text-slate-400 italic">No specific skills listed.</span>
+                  )}
+                </div>
+              </div>
+
               <h4 className="flex items-center text-lg font-bold text-slate-900 mb-4">
                 <MapPin size={20} className="mr-2 text-brand-500" /> Career Roadmap
               </h4>
@@ -358,7 +377,7 @@ const CareerCard: React.FC<{
               {/* Universities */}
               <div>
                 <h4 className="flex items-center text-lg font-bold text-slate-900 mb-4">
-                  <GraduationCap size={20} className="mr-2 text-purple-600" /> Education
+                  <GraduationCap size={20} className="mr-2 text-purple-600" /> University Recommendations
                 </h4>
                 <div className="space-y-3">
                   {universities.length > 0 ? (

@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Compass, Loader2, LogOut, User as UserIcon, LayoutDashboard, Sparkles, CheckCircle2, ShieldCheck, Mail, ArrowRight } from 'lucide-react';
 import { AppView, AssessmentData, CareerResponse, User } from './types';
@@ -14,6 +15,20 @@ const App: React.FC = () => {
   const [user, setUser] = useState<User | null>(null);
   const [errorMsg, setErrorMsg] = useState<string>('');
 
+  // Load results from local storage on mount
+  useEffect(() => {
+    const savedResults = localStorage.getItem('rahnuma_results');
+    if (savedResults) {
+      try {
+        setResults(JSON.parse(savedResults));
+        // Only set view to RESULTS if we have data AND we aren't in another specific state like Loading or Error
+        // We'll let the auth check below handle the initial redirect logic
+      } catch (e) {
+        console.error("Failed to parse saved results");
+      }
+    }
+  }, []);
+
   // Listen for Firebase Auth changes
   useEffect(() => {
     const unsubscribe = subscribeToAuthChanges((firebaseUser) => {
@@ -26,6 +41,7 @@ const App: React.FC = () => {
         
         // If user logs in while on Auth or Landing page, redirect to Dashboard
         if (view === AppView.AUTH || view === AppView.LANDING) {
+           // If we have saved results, maybe go there? For now, stick to Dashboard for better UX flow
            setView(AppView.DASHBOARD);
         }
       } else {
@@ -55,6 +71,7 @@ const App: React.FC = () => {
 
   const handleLogout = async () => {
     await logoutUser();
+    localStorage.removeItem('rahnuma_results'); // Clear data on logout
     setUser(null);
     setResults(null);
     setView(AppView.LANDING);
@@ -68,7 +85,9 @@ const App: React.FC = () => {
       // Pass the user name to the prompt for better personalization
       const dataWithUser = { ...data, name: user?.name || data.name };
       const response = await generateCareerGuidance(dataWithUser);
+      
       setResults(response);
+      localStorage.setItem('rahnuma_results', JSON.stringify(response)); // Save to local storage
       setView(AppView.RESULTS);
     } catch (error: any) {
       console.error(error);
@@ -81,6 +100,7 @@ const App: React.FC = () => {
 
   const handleReset = () => {
     setResults(null);
+    localStorage.removeItem('rahnuma_results');
     setView(AppView.ASSESSMENT);
   };
 
@@ -204,7 +224,7 @@ const App: React.FC = () => {
                  <div className="w-full pt-6 border-t border-slate-100">
                     <div className="flex items-center justify-center text-green-700 bg-green-50 px-3 py-2 rounded-lg text-sm font-medium">
                         <ShieldCheck size={16} className="mr-2" />
-                        Account Verified via Google
+                        Account Verified
                     </div>
                  </div>
               </div>
@@ -219,13 +239,22 @@ const App: React.FC = () => {
                     <p className="text-brand-100 mb-8 max-w-lg text-lg leading-relaxed">
                       Ready to discover your ideal career? Take our AI-powered assessment to find the best universities and courses customized for you.
                     </p>
-                    <div>
+                    <div className="flex gap-4">
                       <button 
                         onClick={handleStart}
                         className="bg-white text-brand-700 hover:bg-brand-50 px-8 py-4 rounded-xl font-bold shadow-md transition-all hover:translate-x-1 flex items-center"
                       >
                         Start New Assessment <ArrowRight size={20} className="ml-2" />
                       </button>
+                      
+                      {results && (
+                        <button 
+                          onClick={() => setView(AppView.RESULTS)}
+                          className="bg-brand-800 bg-opacity-40 hover:bg-opacity-60 text-white border border-brand-400 px-6 py-4 rounded-xl font-bold shadow-sm transition-all"
+                        >
+                          View Saved Results
+                        </button>
+                      )}
                     </div>
                  </div>
               </div>
