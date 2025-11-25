@@ -42,6 +42,9 @@ export interface CareerRecommendation {
   shortCourses: ShortCourse[]; 
   freelancePotential: string;
   estimatedSalaryRangePKR: string;
+  salaryMin: number; // Numeric min for charts
+  salaryMax: number; // Numeric max for charts
+  marketDemand: number; // 0-100 Score for charts
 }
 
 export interface CareerResponse {

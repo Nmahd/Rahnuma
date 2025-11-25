@@ -3,7 +3,8 @@ import { GoogleGenAI, Type } from "@google/genai";
 import { AssessmentData, CareerResponse } from "../types";
 
 // Initialize Gemini Client
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+// NOTE: For production, consider moving this to an environment variable.
+const ai = new GoogleGenAI({ apiKey: "AIzaSyDrdKf9Rn6_JGQxC895cMVqaTge25auew8" });
 
 export const generateCareerGuidance = async (data: AssessmentData): Promise<CareerResponse> => {
   try {
@@ -54,6 +55,8 @@ export const generateCareerGuidance = async (data: AssessmentData): Promise<Care
          - Difficulty Level (Beginner / Intermediate / Advanced).
       7. Freelancing potential (Upwork/Fiverr demand) or remote work opportunities.
       8. Estimated entry-level monthly salary range in PKR.
+      9. **Numeric Salary Data**: Provide 'salaryMin' and 'salaryMax' as numbers (e.g., 50000 and 80000) representing the monthly starting salary in PKR.
+      10. **Market Demand Score**: A score from 0-100 representing the current job market demand/growth in Pakistan for this field.
 
       Also provide a short overall analysis of the profile.
     `;
@@ -123,7 +126,10 @@ export const generateCareerGuidance = async (data: AssessmentData): Promise<Care
                     }
                   },
                   freelancePotential: { type: Type.STRING },
-                  estimatedSalaryRangePKR: { type: Type.STRING }
+                  estimatedSalaryRangePKR: { type: Type.STRING },
+                  salaryMin: { type: Type.NUMBER, description: "Minimum starting monthly salary in PKR (numeric)" },
+                  salaryMax: { type: Type.NUMBER, description: "Maximum starting monthly salary in PKR (numeric)" },
+                  marketDemand: { type: Type.NUMBER, description: "0-100 score representing market demand" }
                 }
               }
             }

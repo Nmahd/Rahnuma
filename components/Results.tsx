@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { CareerRecommendation, CareerResponse, University } from '../types';
 import { MapPin, GraduationCap, Briefcase, Award, Laptop, Banknote, ChevronDown, ChevronUp, ExternalLink, Clock, DollarSign, BookOpen, Trophy, Monitor, BarChart, PlusCircle, CheckCircle2 } from 'lucide-react';
 import UniversityComparison from './UniversityComparison';
+import CareerCharts from './CareerCharts';
 
 interface ResultsProps {
   data: CareerResponse;
@@ -36,6 +37,12 @@ const Results: React.FC<ResultsProps> = ({ data, onReset }) => {
         <div className="prose prose-slate max-w-none text-slate-600 leading-relaxed">
           <p>{data.analysis}</p>
         </div>
+      </div>
+
+      {/* Visualizations */}
+      <div>
+        <h3 className="text-xl font-bold text-slate-800 px-2 mb-4">Market Insights</h3>
+        <CareerCharts recommendations={data.recommendations} />
       </div>
 
       <h3 className="text-xl font-bold text-slate-800 px-2">Recommended Career Paths</h3>
