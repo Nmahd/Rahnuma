@@ -2,9 +2,32 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import { AssessmentData, CareerResponse } from "../types";
 
+// Helper to safely get the API key from different environment configurations
+const getApiKey = () => {
+  // 1. Try Vite standard (starts with VITE_)
+  // @ts-ignore - import.meta is a valid property in modern bundlers
+  if (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_API_KEY) {
+    // @ts-ignore
+    return import.meta.env.VITE_API_KEY;
+  }
+  
+  // 2. Try Standard process.env (Node/CRA/Next.js)
+  if (typeof process !== 'undefined' && process.env) {
+    // Check for standard generic, CRA, or Next.js prefixes
+    return process.env.API_KEY || process.env.REACT_APP_API_KEY || process.env.NEXT_PUBLIC_API_KEY;
+  }
+  
+  return '';
+};
+
+const apiKey = getApiKey();
+
+if (!apiKey) {
+  console.error("API Key is missing! Please set VITE_API_KEY in your environment variables.");
+}
+
 // Initialize Gemini Client
-// NOTE: For production, consider moving this to an environment variable.
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+const ai = new GoogleGenAI({ apiKey: apiKey });
 
 export const generateCareerGuidance = async (data: AssessmentData): Promise<CareerResponse> => {
   try {
