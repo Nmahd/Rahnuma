@@ -215,9 +215,17 @@ const UniversityCard: React.FC<{
 
              <div>
                 <h5 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Key Subjects</h5>
-                <p className="text-sm text-slate-600 leading-relaxed">
-                   {uni.keySubjects?.join(", ") || "Standard curriculum"}
-                </p>
+                <div className="flex flex-wrap gap-2">
+                  {uni.keySubjects && uni.keySubjects.length > 0 ? (
+                    uni.keySubjects.map((subject, idx) => (
+                      <span key={idx} className="text-xs font-medium text-slate-600 bg-slate-100 border border-slate-200 px-2 py-1 rounded-md">
+                        {subject}
+                      </span>
+                    ))
+                  ) : (
+                    <span className="text-sm text-slate-500 italic">Standard curriculum</span>
+                  )}
+                </div>
              </div>
 
              {uni.website && (

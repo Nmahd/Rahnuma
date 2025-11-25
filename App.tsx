@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Compass, Loader2, LogOut, User as UserIcon } from 'lucide-react';
 import { AppView, AssessmentData, CareerResponse, User } from './types';
 import { generateCareerGuidance } from './services/geminiService';
+import { subscribeToAuthChanges, logoutUser } from './services/firebase';
 import Assessment from './components/Assessment';
 import Results from './components/Results';
 import Auth from './components/Auth';
@@ -12,6 +13,23 @@ const App: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [user, setUser] = useState<User | null>(null);
   const [errorMsg, setErrorMsg] = useState<string>('');
+
+  // Listen for Firebase Auth changes
+  useEffect(() => {
+    const unsubscribe = subscribeToAuthChanges((firebaseUser) => {
+      if (firebaseUser) {
+        setUser({
+          name: firebaseUser.displayName || firebaseUser.email?.split('@')[0] || 'User',
+          email: firebaseUser.email || '',
+          avatar: firebaseUser.photoURL || undefined
+        });
+      } else {
+        setUser(null);
+      }
+    });
+
+    return () => unsubscribe();
+  }, []);
 
   const handleStart = () => {
     if (!user) {
@@ -26,7 +44,8 @@ const App: React.FC = () => {
     setView(AppView.LANDING);
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    await logoutUser();
     setUser(null);
     setResults(null);
     setView(AppView.LANDING);
@@ -72,7 +91,11 @@ const App: React.FC = () => {
                {user ? (
                  <div className="flex items-center gap-3 pl-4 border-l border-slate-200">
                     <div className="flex items-center gap-2">
-                      <img src={user.avatar} alt={user.name} className="w-8 h-8 rounded-full bg-slate-200" />
+                      <img 
+                        src={user.avatar || `https://ui-avatars.com/api/?name=${user.name}&background=16a34a&color=fff`} 
+                        alt={user.name} 
+                        className="w-8 h-8 rounded-full bg-slate-200 object-cover" 
+                      />
                       <span className="text-sm font-medium text-slate-700 hidden sm:block">{user.name}</span>
                     </div>
                     <button 

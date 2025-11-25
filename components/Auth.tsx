@@ -1,7 +1,7 @@
-
 import React, { useState } from 'react';
 import { User } from '../types';
-import { Compass, Mail, Lock, User as UserIcon, ArrowRight } from 'lucide-react';
+import { Compass, Mail, Lock, User as UserIcon, ArrowRight, AlertCircle } from 'lucide-react';
+import { signInWithGoogle } from '../services/firebase';
 
 interface AuthProps {
   onLogin: (user: User) => void;
@@ -14,12 +14,16 @@ const Auth: React.FC<AuthProps> = ({ onLogin, onCancel }) => {
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
+  // Note: We are keeping the mock email/password login for now as Firebase Email/Pass 
+  // requires more setup, but Google Sign In is fully integrated.
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
+    setError(null);
     
-    // Simulate API call
+    // Simulate API call for email/password
     setTimeout(() => {
       onLogin({
         name: name || (email.split('@')[0]),
@@ -30,17 +34,30 @@ const Auth: React.FC<AuthProps> = ({ onLogin, onCancel }) => {
     }, 1500);
   };
 
-  const handleGoogleLogin = () => {
+  const handleGoogleLogin = async () => {
     setIsLoading(true);
-    // Simulate Google Login
-    setTimeout(() => {
-      onLogin({
-        name: "Google User",
-        email: "user@gmail.com",
-        avatar: "https://lh3.googleusercontent.com/a/default-user=s96-c"
-      });
+    setError(null);
+    try {
+      const firebaseUser = await signInWithGoogle();
+      
+      // Map Firebase user to App user
+      const appUser: User = {
+        name: firebaseUser.displayName || 'User',
+        email: firebaseUser.email || '',
+        avatar: firebaseUser.photoURL || `https://ui-avatars.com/api/?name=${firebaseUser.displayName}&background=16a34a&color=fff`
+      };
+      
+      onLogin(appUser);
+    } catch (err: any) {
+      console.error(err);
+      if (err.message && err.message.includes("Firebase not initialized")) {
+        setError("Firebase Configuration Missing. Please check env variables.");
+      } else {
+        setError("Failed to sign in with Google. Please try again.");
+      }
+    } finally {
       setIsLoading(false);
-    }, 1500);
+    }
   };
 
   return (
@@ -57,6 +74,13 @@ const Auth: React.FC<AuthProps> = ({ onLogin, onCancel }) => {
             {isLogin ? 'Welcome back! Please enter your details.' : 'Start your career journey with us today.'}
           </p>
         </div>
+
+        {error && (
+          <div className="bg-red-50 text-red-600 p-3 rounded-lg text-sm flex items-center">
+            <AlertCircle size={16} className="mr-2 flex-shrink-0" />
+            {error}
+          </div>
+        )}
         
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           <div className="rounded-md shadow-sm space-y-4">
@@ -149,24 +173,11 @@ const Auth: React.FC<AuthProps> = ({ onLogin, onCancel }) => {
             disabled={isLoading}
             className="w-full flex items-center justify-center px-4 py-3 border border-slate-300 rounded-lg shadow-sm text-sm font-medium text-slate-700 bg-white hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-500 transition-colors"
           >
-            <svg className="h-5 w-5 mr-3" aria-hidden="true" viewBox="0 0 24 24">
-              <path
-                d="M12.0003 20.45C16.6366 20.45 20.5369 17.2936 21.9482 13.0909H12.0003V9.54545H23.6366C23.7703 10.2282 23.8639 10.9418 23.8639 11.6955C23.8639 18.2373 18.5253 23.6364 12.0003 23.6364C5.57303 23.6364 0.363953 18.4273 0.363953 12C0.363953 5.57273 5.57303 0.363636 12.0003 0.363636C14.8812 0.363636 17.4475 1.30909 19.4675 2.87273L16.8666 5.47273C15.9121 4.58182 14.2812 3.81818 12.0003 3.81818C7.61895 3.81818 3.99123 7.28182 3.99123 11.6727C3.99123 16.0636 7.61895 19.5273 12.0003 19.5273Z"
-                fill="#4285F4"
-              />
-              <path
-                d="M21.9481 13.0909C21.6797 12.0727 21.233 11.1182 20.6559 10.2636L16.8665 13.0909H21.9481Z"
-                fill="#FBBC05"
-              />
-              <path
-                d="M10.2981 20.1727L12.986 16.2727L16.8665 13.0909C15.8647 15.6818 13.3442 17.5273 10.4217 17.5273C9.03444 17.5273 7.74716 17.1182 6.6665 16.4182L3.93079 18.5182C5.64533 20.2 8.05625 21.2273 10.669 21.2273C10.5453 20.8818 10.4217 20.5273 10.2981 20.1727Z"
-                fill="#34A853"
-              />
-              <path
-                d="M3.93081 18.5182L6.66653 16.4182C5.78653 15.1091 5.27926 13.5273 5.27926 11.8364C5.27926 10.1455 5.78653 8.56364 6.66653 7.25455L3.93081 5.15454C1.72354 8.24545 1.72354 15.4273 3.93081 18.5182Z"
-                fill="#EA4335"
-              />
-            </svg>
+            <img 
+              src="https://www.gstatic.com/images/branding/product/1x/g_logo_48px.png" 
+              alt="Google Logo" 
+              className="h-5 w-5 mr-3" 
+            />
             Continue with Google
           </button>
         </div>
