@@ -1,8 +1,12 @@
+
 import { initializeApp } from 'firebase/app';
 import { 
   getAuth, 
   GoogleAuthProvider, 
   signInWithPopup, 
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  updateProfile,
   signOut as firebaseSignOut,
   onAuthStateChanged,
   User as FirebaseUser
@@ -56,6 +60,32 @@ export const signInWithGoogle = async () => {
     return result.user;
   } catch (error) {
     console.error("Error signing in with Google", error);
+    throw error;
+  }
+};
+
+export const registerWithEmail = async (name: string, email: string, pass: string) => {
+  if (!auth) throw new Error("Firebase not initialized");
+  try {
+    const userCredential = await createUserWithEmailAndPassword(auth, email, pass);
+    // Update the user's display name immediately
+    await updateProfile(userCredential.user, {
+      displayName: name
+    });
+    return userCredential.user;
+  } catch (error) {
+    console.error("Error registering", error);
+    throw error;
+  }
+};
+
+export const loginWithEmail = async (email: string, pass: string) => {
+  if (!auth) throw new Error("Firebase not initialized");
+  try {
+    const userCredential = await signInWithEmailAndPassword(auth, email, pass);
+    return userCredential.user;
+  } catch (error) {
+    console.error("Error logging in", error);
     throw error;
   }
 };
