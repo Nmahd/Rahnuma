@@ -1,4 +1,3 @@
-
 import { GoogleGenAI, Type } from "@google/genai";
 import { AssessmentData, CareerResponse } from "../types";
 
@@ -76,10 +75,18 @@ export const generateCareerGuidance = async (data: AssessmentData): Promise<Care
          - Link (URL to the course or provider home page).
          - Format (Online / On-site / Hybrid).
          - Difficulty Level (Beginner / Intermediate / Advanced).
-      7. Freelancing potential (Upwork/Fiverr demand) or remote work opportunities.
-      8. Estimated entry-level monthly salary range in PKR.
-      9. **Numeric Salary Data**: Provide 'salaryMin' and 'salaryMax' as numbers (e.g., 50000 and 80000) representing the monthly starting salary in PKR.
-      10. **Market Demand Score**: A score from 0-100 representing the current job market demand/growth in Pakistan for this field.
+      7. **Free YouTube Learning**: Suggest 2-3 specific FREE courses or playlists on YouTube.
+         - Title of the series/playlist.
+         - Channel Name (e.g., "CodeWithHarry", "GFXMentor", "Azad Chaiwala").
+         - URL (link to the channel or playlist).
+      8. **Inspiration & Role Models**: Suggest 2 famous personalities (Pakistani or Global) in this field.
+         - Name.
+         - Role/Title (e.g., "CEO of Netsol", "Founder of Tesla").
+         - Context (1 sentence on why they are a role model for this specific career).
+      9. Freelancing potential (Upwork/Fiverr demand) or remote work opportunities.
+      10. Estimated entry-level monthly salary range in PKR.
+      11. **Numeric Salary Data**: Provide 'salaryMin' and 'salaryMax' as numbers (e.g., 50000 and 80000).
+      12. **Market Demand Score**: A score from 0-100.
 
       Also provide a short overall analysis of the profile.
     `;
@@ -121,13 +128,11 @@ export const generateCareerGuidance = async (data: AssessmentData): Promise<Care
                         ranking: { type: Type.STRING },
                         recommendedPrograms: { 
                           type: Type.ARRAY, 
-                          items: { type: Type.STRING },
-                          description: "Specific degree titles to apply for"
+                          items: { type: Type.STRING }
                         },
                         keySubjects: {
                           type: Type.ARRAY,
-                          items: { type: Type.STRING },
-                          description: "Core subjects covered in the degree"
+                          items: { type: Type.STRING }
                         }
                       }
                     }
@@ -148,11 +153,33 @@ export const generateCareerGuidance = async (data: AssessmentData): Promise<Care
                       }
                     }
                   },
+                  youtubeCourses: {
+                    type: Type.ARRAY,
+                    items: {
+                      type: Type.OBJECT,
+                      properties: {
+                        title: { type: Type.STRING },
+                        channelName: { type: Type.STRING },
+                        url: { type: Type.STRING }
+                      }
+                    }
+                  },
+                  roleModels: {
+                    type: Type.ARRAY,
+                    items: {
+                      type: Type.OBJECT,
+                      properties: {
+                        name: { type: Type.STRING },
+                        role: { type: Type.STRING },
+                        context: { type: Type.STRING }
+                      }
+                    }
+                  },
                   freelancePotential: { type: Type.STRING },
                   estimatedSalaryRangePKR: { type: Type.STRING },
-                  salaryMin: { type: Type.NUMBER, description: "Minimum starting monthly salary in PKR (numeric)" },
-                  salaryMax: { type: Type.NUMBER, description: "Maximum starting monthly salary in PKR (numeric)" },
-                  marketDemand: { type: Type.NUMBER, description: "0-100 score representing market demand" }
+                  salaryMin: { type: Type.NUMBER },
+                  salaryMax: { type: Type.NUMBER },
+                  marketDemand: { type: Type.NUMBER }
                 }
               }
             }

@@ -33,6 +33,18 @@ export interface ShortCourse {
   level?: string; // e.g. Beginner, Advanced
 }
 
+export interface YoutubeResource {
+  title: string;
+  channelName: string;
+  url: string;
+}
+
+export interface RoleModel {
+  name: string;
+  role: string;
+  context: string; // Why they are famous
+}
+
 export interface CareerRecommendation {
   title: string;
   matchScore: number; // 0-100
@@ -40,6 +52,8 @@ export interface CareerRecommendation {
   roadmap: string[];
   universities: University[];
   shortCourses: ShortCourse[]; 
+  youtubeCourses: YoutubeResource[];
+  roleModels: RoleModel[];
   freelancePotential: string;
   estimatedSalaryRangePKR: string;
   salaryMin: number; // Numeric min for charts

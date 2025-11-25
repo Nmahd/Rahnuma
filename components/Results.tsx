@@ -19,7 +19,10 @@ import {
   CheckCircle2,
   TrendingUp,
   Banknote,
-  Globe
+  Globe,
+  Youtube,
+  Star,
+  Users
 } from 'lucide-react';
 import UniversityComparison from './UniversityComparison';
 
@@ -386,6 +389,64 @@ const CareerCard: React.FC<{
                 </div>
               </div>
             </div>
+
+            {/* Inspiration & Free Learning Section */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 pt-4">
+               {/* YouTube Courses */}
+               <div>
+                  <h4 className="flex items-center text-lg font-bold text-slate-900 mb-4">
+                    <Youtube size={20} className="mr-2 text-red-600" /> Free YouTube Courses
+                  </h4>
+                  <div className="space-y-3">
+                     {career.youtubeCourses && career.youtubeCourses.map((yt, i) => (
+                       <a 
+                         key={i} 
+                         href={yt.url}
+                         target="_blank" 
+                         rel="noopener noreferrer"
+                         className="flex items-center p-3 bg-white rounded-xl border border-slate-200 hover:border-red-200 hover:shadow-sm transition group"
+                       >
+                         <div className="w-10 h-10 rounded-full bg-red-50 flex items-center justify-center text-red-600 flex-shrink-0 mr-3 group-hover:bg-red-600 group-hover:text-white transition-colors">
+                            <Youtube size={20} />
+                         </div>
+                         <div>
+                            <h5 className="text-sm font-bold text-slate-800 group-hover:text-red-700">{yt.title}</h5>
+                            <p className="text-xs text-slate-500">{yt.channelName}</p>
+                         </div>
+                         <ExternalLink size={14} className="ml-auto text-slate-300 group-hover:text-red-400" />
+                       </a>
+                     ))}
+                     {(!career.youtubeCourses || career.youtubeCourses.length === 0) && (
+                        <p className="text-sm text-slate-400 italic">No specific YouTube courses suggested.</p>
+                     )}
+                  </div>
+               </div>
+
+               {/* Role Models */}
+               <div>
+                  <h4 className="flex items-center text-lg font-bold text-slate-900 mb-4">
+                    <Star size={20} className="mr-2 text-yellow-500" /> Role Models
+                  </h4>
+                  <div className="space-y-3">
+                     {career.roleModels && career.roleModels.map((person, i) => (
+                       <div key={i} className="flex items-start p-3 bg-slate-50 rounded-xl border border-slate-100">
+                          <div className="w-10 h-10 rounded-full bg-yellow-100 flex items-center justify-center text-yellow-600 flex-shrink-0 mr-3">
+                             <Users size={20} />
+                          </div>
+                          <div>
+                             <h5 className="text-sm font-bold text-slate-800">{person.name}</h5>
+                             <p className="text-xs font-semibold text-slate-600">{person.role}</p>
+                             <p className="text-xs text-slate-500 mt-1 italic">"{person.context}"</p>
+                          </div>
+                       </div>
+                     ))}
+                     {(!career.roleModels || career.roleModels.length === 0) && (
+                        <p className="text-sm text-slate-400 italic">No specific role models found.</p>
+                     )}
+                  </div>
+               </div>
+            </div>
+
           </div>
         </div>
       )}
