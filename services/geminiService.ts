@@ -4,7 +4,7 @@ import { AssessmentData, CareerResponse } from "../types";
 
 // Initialize Gemini Client
 // NOTE: For production, consider moving this to an environment variable.
-const ai = new GoogleGenAI({ apiKey: "AIzaSyDrdKf9Rn6_JGQxC895cMVqaTge25auew8" });
+const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
 export const generateCareerGuidance = async (data: AssessmentData): Promise<CareerResponse> => {
   try {
