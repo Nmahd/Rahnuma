@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { AssessmentData } from '../types';
-import { INTEREST_OPTIONS, EDUCATION_LEVELS, MAJOR_SUBJECTS, WORK_PREFERENCES, CITIES_PAKISTAN, BUDGET_RANGES } from '../constants';
+import { INTEREST_OPTIONS, EDUCATION_LEVELS, SUBJECT_OPTIONS, WORK_PREFERENCES, CITIES_PAKISTAN, BUDGET_RANGES } from '../constants';
 import { ArrowRight, ArrowLeft, CheckCircle2 } from 'lucide-react';
 
 interface AssessmentProps {
@@ -14,7 +14,7 @@ const Assessment: React.FC<AssessmentProps> = ({ onSubmit, onCancel }) => {
     name: '',
     city: 'Karachi',
     educationLevel: EDUCATION_LEVELS[0],
-    majorSubjects: MAJOR_SUBJECTS[0],
+    majorSubjects: SUBJECT_OPTIONS[EDUCATION_LEVELS[0]][0],
     interests: [],
     hobbies: '',
     workPreference: WORK_PREFERENCES[0],
@@ -23,6 +23,14 @@ const Assessment: React.FC<AssessmentProps> = ({ onSubmit, onCancel }) => {
   });
 
   const totalSteps = 4;
+
+  // Update majorSubjects when educationLevel changes
+  useEffect(() => {
+    const subjects = SUBJECT_OPTIONS[formData.educationLevel];
+    if (subjects && subjects.length > 0) {
+      setFormData(prev => ({ ...prev, majorSubjects: subjects[0] }));
+    }
+  }, [formData.educationLevel]);
 
   const handleNext = () => {
     if (step < totalSteps) setStep(step + 1);
@@ -45,6 +53,9 @@ const Assessment: React.FC<AssessmentProps> = ({ onSubmit, onCancel }) => {
       }
     });
   };
+
+  // Helper for current subjects based on education level
+  const currentSubjects = SUBJECT_OPTIONS[formData.educationLevel] || ["Other"];
 
   return (
     <div className="max-w-2xl mx-auto bg-white rounded-2xl shadow-xl overflow-hidden border border-slate-100">
@@ -75,7 +86,7 @@ const Assessment: React.FC<AssessmentProps> = ({ onSubmit, onCancel }) => {
                 <label className="block text-sm font-medium text-slate-700 mb-1">Full Name</label>
                 <input 
                   type="text" 
-                  className="w-full px-4 py-3 rounded-lg border border-slate-200 focus:border-brand-500 focus:ring-2 focus:ring-brand-200 outline-none transition"
+                  className="w-full px-4 py-3 rounded-lg border border-slate-200 bg-white text-slate-900 focus:border-brand-500 focus:ring-2 focus:ring-brand-200 outline-none transition placeholder-slate-400"
                   placeholder="e.g. Ali Khan"
                   value={formData.name}
                   onChange={(e) => setFormData({...formData, name: e.target.value})}
@@ -84,7 +95,7 @@ const Assessment: React.FC<AssessmentProps> = ({ onSubmit, onCancel }) => {
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1">City</label>
                 <select 
-                  className="w-full px-4 py-3 rounded-lg border border-slate-200 focus:border-brand-500 focus:ring-2 focus:ring-brand-200 outline-none transition bg-white"
+                  className="w-full px-4 py-3 rounded-lg border border-slate-200 bg-white text-slate-900 focus:border-brand-500 focus:ring-2 focus:ring-brand-200 outline-none transition"
                   value={formData.city}
                   onChange={(e) => setFormData({...formData, city: e.target.value})}
                 >
@@ -103,7 +114,7 @@ const Assessment: React.FC<AssessmentProps> = ({ onSubmit, onCancel }) => {
                 <label className="block text-sm font-medium text-slate-700 mb-1">Current Education Level</label>
                 <div className="space-y-2">
                   {EDUCATION_LEVELS.map((level) => (
-                    <label key={level} className={`flex items-center p-3 rounded-lg border cursor-pointer transition ${formData.educationLevel === level ? 'border-brand-500 bg-brand-50' : 'border-slate-200 hover:border-slate-300'}`}>
+                    <label key={level} className={`flex items-center p-3 rounded-lg border cursor-pointer transition ${formData.educationLevel === level ? 'border-brand-500 bg-brand-50' : 'border-slate-200 hover:border-slate-300'} bg-white`}>
                       <input 
                         type="radio" 
                         name="education" 
@@ -111,7 +122,7 @@ const Assessment: React.FC<AssessmentProps> = ({ onSubmit, onCancel }) => {
                         checked={formData.educationLevel === level}
                         onChange={() => setFormData({...formData, educationLevel: level})}
                       />
-                      <span className="ml-3 text-slate-700">{level}</span>
+                      <span className="ml-3 text-slate-900">{level}</span>
                     </label>
                   ))}
                 </div>
@@ -120,11 +131,11 @@ const Assessment: React.FC<AssessmentProps> = ({ onSubmit, onCancel }) => {
               <div className="mt-4">
                 <label className="block text-sm font-medium text-slate-700 mb-1">Major Subjects / Group</label>
                 <select 
-                  className="w-full px-4 py-3 rounded-lg border border-slate-200 focus:border-brand-500 focus:ring-2 focus:ring-brand-200 outline-none transition bg-white"
+                  className="w-full px-4 py-3 rounded-lg border border-slate-200 bg-white text-slate-900 focus:border-brand-500 focus:ring-2 focus:ring-brand-200 outline-none transition"
                   value={formData.majorSubjects}
                   onChange={(e) => setFormData({...formData, majorSubjects: e.target.value})}
                 >
-                  {MAJOR_SUBJECTS.map(subj => (
+                  {currentSubjects.map(subj => (
                     <option key={subj} value={subj}>{subj}</option>
                   ))}
                 </select>
@@ -144,7 +155,7 @@ const Assessment: React.FC<AssessmentProps> = ({ onSubmit, onCancel }) => {
                     <button
                       key={item.id}
                       onClick={() => toggleInterest(item.label)}
-                      className={`flex flex-col items-center justify-center p-4 rounded-xl border transition-all duration-200 ${
+                      className={`flex flex-col items-center justify-center p-4 rounded-xl border transition-all duration-200 bg-white ${
                         isSelected 
                           ? 'border-brand-500 bg-brand-50 text-brand-700 shadow-sm ring-1 ring-brand-500' 
                           : 'border-slate-200 hover:border-brand-300 hover:bg-slate-50 text-slate-600'
@@ -160,7 +171,7 @@ const Assessment: React.FC<AssessmentProps> = ({ onSubmit, onCancel }) => {
                 <label className="block text-sm font-medium text-slate-700 mb-1">Any specific hobbies?</label>
                 <input 
                   type="text" 
-                  className="w-full px-4 py-2 rounded-lg border border-slate-200 focus:border-brand-500 focus:ring-2 focus:ring-brand-200 outline-none transition"
+                  className="w-full px-4 py-2 rounded-lg border border-slate-200 bg-white text-slate-900 focus:border-brand-500 focus:ring-2 focus:ring-brand-200 outline-none transition placeholder-slate-400"
                   placeholder="e.g. Sketching, Gaming, Reading history..."
                   value={formData.hobbies}
                   onChange={(e) => setFormData({...formData, hobbies: e.target.value})}
@@ -176,7 +187,7 @@ const Assessment: React.FC<AssessmentProps> = ({ onSubmit, onCancel }) => {
                 <label className="block text-sm font-medium text-slate-700 mb-2">Work Environment Preference</label>
                 <div className="grid grid-cols-1 gap-2">
                   {WORK_PREFERENCES.map((pref) => (
-                     <label key={pref} className={`flex items-center p-3 rounded-lg border cursor-pointer transition ${formData.workPreference === pref ? 'border-brand-500 bg-brand-50' : 'border-slate-200 hover:border-slate-300'}`}>
+                     <label key={pref} className={`flex items-center p-3 rounded-lg border cursor-pointer transition ${formData.workPreference === pref ? 'border-brand-500 bg-brand-50' : 'border-slate-200 hover:border-slate-300'} bg-white`}>
                      <input 
                        type="radio" 
                        name="workpref" 
@@ -184,7 +195,7 @@ const Assessment: React.FC<AssessmentProps> = ({ onSubmit, onCancel }) => {
                        checked={formData.workPreference === pref}
                        onChange={() => setFormData({...formData, workPreference: pref})}
                      />
-                     <span className="ml-3 text-slate-700">{pref}</span>
+                     <span className="ml-3 text-slate-900">{pref}</span>
                    </label>
                   ))}
                 </div>
@@ -193,7 +204,7 @@ const Assessment: React.FC<AssessmentProps> = ({ onSubmit, onCancel }) => {
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1">Primary Goal</label>
                 <select 
-                  className="w-full px-4 py-3 rounded-lg border border-slate-200 focus:border-brand-500 focus:ring-2 focus:ring-brand-200 outline-none transition bg-white"
+                  className="w-full px-4 py-3 rounded-lg border border-slate-200 bg-white text-slate-900 focus:border-brand-500 focus:ring-2 focus:ring-brand-200 outline-none transition"
                   value={formData.financialGoal}
                   onChange={(e) => setFormData({...formData, financialGoal: e.target.value})}
                 >
@@ -208,7 +219,7 @@ const Assessment: React.FC<AssessmentProps> = ({ onSubmit, onCancel }) => {
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1">Estimated Education Budget</label>
                 <select 
-                  className="w-full px-4 py-3 rounded-lg border border-slate-200 focus:border-brand-500 focus:ring-2 focus:ring-brand-200 outline-none transition bg-white"
+                  className="w-full px-4 py-3 rounded-lg border border-slate-200 bg-white text-slate-900 focus:border-brand-500 focus:ring-2 focus:ring-brand-200 outline-none transition"
                   value={formData.budgetRange}
                   onChange={(e) => setFormData({...formData, budgetRange: e.target.value})}
                 >

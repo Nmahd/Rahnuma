@@ -1,17 +1,35 @@
+
 import React, { useState } from 'react';
-import { Compass, Loader2 } from 'lucide-react';
-import { AppView, AssessmentData, CareerResponse } from './types';
+import { Compass, Loader2, LogOut, User as UserIcon } from 'lucide-react';
+import { AppView, AssessmentData, CareerResponse, User } from './types';
 import { generateCareerGuidance } from './services/geminiService';
 import Assessment from './components/Assessment';
 import Results from './components/Results';
+import Auth from './components/Auth';
 
 const App: React.FC = () => {
   const [view, setView] = useState<AppView>(AppView.LANDING);
   const [results, setResults] = useState<CareerResponse | null>(null);
   const [loading, setLoading] = useState(false);
+  const [user, setUser] = useState<User | null>(null);
 
   const handleStart = () => {
-    setView(AppView.ASSESSMENT);
+    if (!user) {
+      setView(AppView.AUTH);
+    } else {
+      setView(AppView.ASSESSMENT);
+    }
+  };
+
+  const handleLogin = (loggedInUser: User) => {
+    setUser(loggedInUser);
+    setView(AppView.LANDING);
+  };
+
+  const handleLogout = () => {
+    setUser(null);
+    setResults(null);
+    setView(AppView.LANDING);
   };
 
   const handleAssessmentSubmit = async (data: AssessmentData) => {
@@ -31,7 +49,7 @@ const App: React.FC = () => {
 
   const handleReset = () => {
     setResults(null);
-    setView(AppView.LANDING);
+    setView(AppView.ASSESSMENT);
   };
 
   return (
@@ -46,7 +64,30 @@ const App: React.FC = () => {
             </div>
             <div className="flex items-center space-x-4">
                {view === AppView.RESULTS && (
-                 <button onClick={handleReset} className="text-sm font-medium text-slate-600 hover:text-brand-600 transition">New Search</button>
+                 <button onClick={handleReset} className="text-sm font-medium text-slate-600 hover:text-brand-600 transition hidden sm:block">New Search</button>
+               )}
+               
+               {user ? (
+                 <div className="flex items-center gap-3 pl-4 border-l border-slate-200">
+                    <div className="flex items-center gap-2">
+                      <img src={user.avatar} alt={user.name} className="w-8 h-8 rounded-full bg-slate-200" />
+                      <span className="text-sm font-medium text-slate-700 hidden sm:block">{user.name}</span>
+                    </div>
+                    <button 
+                      onClick={handleLogout}
+                      className="p-2 text-slate-400 hover:text-red-500 transition rounded-full hover:bg-red-50"
+                      title="Logout"
+                    >
+                      <LogOut size={18} />
+                    </button>
+                 </div>
+               ) : (
+                 <button 
+                   onClick={() => setView(AppView.AUTH)}
+                   className="text-sm font-medium text-slate-600 hover:text-brand-600 transition"
+                 >
+                   Log In
+                 </button>
                )}
             </div>
           </div>
@@ -76,9 +117,9 @@ const App: React.FC = () => {
                     onClick={handleStart}
                     className="rounded-full bg-brand-600 px-8 py-3.5 text-sm font-semibold text-white shadow-sm hover:bg-brand-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-600 transition-all hover:scale-105"
                   >
-                    Find My Career Path
+                    {user ? 'Find My Career Path' : 'Get Started'}
                   </button>
-                  <a href="#how-it-works" className="text-sm font-semibold leading-6 text-slate-900">
+                  <a href="#" className="text-sm font-semibold leading-6 text-slate-900">
                     Learn more <span aria-hidden="true">→</span>
                   </a>
                 </div>
@@ -94,6 +135,10 @@ const App: React.FC = () => {
               </div>
             </div>
           </div>
+        )}
+        
+        {view === AppView.AUTH && (
+          <Auth onLogin={handleLogin} onCancel={() => setView(AppView.LANDING)} />
         )}
 
         {view === AppView.ASSESSMENT && (

@@ -17,6 +17,9 @@ export interface University {
   sector: 'Public' | 'Private';
   website: string;
   feeRange: string;
+  ranking: string;
+  recommendedPrograms: string[]; // e.g. "BS CS, BS SE"
+  keySubjects: string[]; // e.g. "Programming Fundamentals, Calculus"
 }
 
 export interface ShortCourse {
@@ -26,6 +29,8 @@ export interface ShortCourse {
   cost: string;
   description?: string;
   link?: string;
+  format?: string; // e.g. Online, On-site
+  level?: string; // e.g. Beginner, Advanced
 }
 
 export interface CareerRecommendation {
@@ -44,8 +49,15 @@ export interface CareerResponse {
   recommendations: CareerRecommendation[];
 }
 
+export interface User {
+  name: string;
+  email: string;
+  avatar?: string;
+}
+
 export enum AppView {
   LANDING = 'LANDING',
+  AUTH = 'AUTH',
   ASSESSMENT = 'ASSESSMENT',
   LOADING = 'LOADING',
   RESULTS = 'RESULTS',

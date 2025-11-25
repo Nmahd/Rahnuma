@@ -1,3 +1,4 @@
+
 import { 
   BookOpen, 
   Code, 
@@ -33,15 +34,56 @@ export const EDUCATION_LEVELS = [
   "Diploma / Vocational"
 ];
 
-export const MAJOR_SUBJECTS = [
-  "Pre-Engineering",
-  "Pre-Medical",
-  "ICS (Computer Science)",
-  "I.Com (Commerce)",
-  "Arts / Humanities",
-  "General Science",
-  "Not Applicable / Other"
-];
+// Mapped subjects based on education level
+export const SUBJECT_OPTIONS: Record<string, string[]> = {
+  "Class 9-10 (Matric/O-Levels)": [
+    "Science (Biology)",
+    "Science (Computer Science)",
+    "Arts / Humanities"
+  ],
+  "Class 11-12 (Inter/A-Levels)": [
+    "Pre-Engineering",
+    "Pre-Medical",
+    "ICS (Computer Science)",
+    "I.Com (Commerce)",
+    "FA (Arts / Humanities)"
+  ],
+  "Undergraduate (University)": [
+    "Electrical Engineering",
+    "Electronics Engineering",
+    "Mechanical Engineering",
+    "Civil Engineering",
+    "Computer Science (CS)",
+    "Software Engineering",
+    "Artificial Intelligence",
+    "Medical (MBBS/BDS)",
+    "Business Administration (BBA)",
+    "Accounting & Finance",
+    "Social Sciences / Psychology",
+    "Law (LLB)",
+    "Fine Arts / Design"
+  ],
+  "Graduated": [
+    "Electrical / Electronics Engineering",
+    "Mechanical / Civil Engineering",
+    "Computer Science / IT",
+    "Data Science / AI",
+    "Business / MBA",
+    "Medical / Health Sciences",
+    "Social Sciences",
+    "English / Literature",
+    "Pure Sciences (Physics, Chem, Bio)"
+  ],
+  "Diploma / Vocational": [
+    "DAE (Civil)",
+    "DAE (Electrical)",
+    "DAE (Mechanical)",
+    "Information Technology",
+    "Fashion Design",
+    "Graphic Design",
+    "Culinary Arts"
+  ]
+};
 
 export const WORK_PREFERENCES = [
   "Office Job (Stable 9-5)",
@@ -52,7 +94,7 @@ export const WORK_PREFERENCES = [
 ];
 
 export const CITIES_PAKISTAN = [
-  "Karachi", "Lahore", "Islamabad", "Rawalpindi", "Faisalabad", "Multan", "Peshawar", "Quetta", "Sialkot", "Hyderabad", "Other"
+  "Karachi", "Lahore", "Islamabad", "Rawalpindi", "Faisalabad", "Multan", "Peshawar", "Quetta", "Sialkot", "Hyderabad", "Gujranwala", "Abbottabad", "Other"
 ];
 
 export const BUDGET_RANGES = [

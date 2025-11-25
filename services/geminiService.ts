@@ -23,6 +23,12 @@ export const generateCareerGuidance = async (data: AssessmentData): Promise<Care
 
       Task:
       Based on this profile and their budget, suggest 3 distinct career paths.
+      
+      IMPORTANT:
+      When suggesting universities, YOU MUST PRIORITIZE universities located in **${data.city}**. 
+      If there are good universities for the career path in ${data.city}, list them first. 
+      Only suggest universities in other cities if they are significantly better (e.g. LUMS, NUST, GIKI) or if options in ${data.city} are limited.
+      
       For each path, provide:
       1. A relevant title.
       2. A match score (0-100) based on their interests.
@@ -34,6 +40,9 @@ export const generateCareerGuidance = async (data: AssessmentData): Promise<Care
          - Sector (Public/Private).
          - Official Website URL (ensure it is correct or provide the main domain).
          - Approximate Fee Range (per semester in PKR). Make sure this fits the user's budget constraint if possible.
+         - Approximate Ranking or Tier (e.g., "Top 5 in Pakistan", "Tier 1", "Best for CS in ${data.city}").
+         - Recommended Programs: List 2-3 specific degree titles they should apply for (e.g., "BS Software Engineering", "BBA").
+         - Key Subjects: A brief list of 3-5 core subjects they will study (e.g., "Programming, Calculus, Algorithms").
       6. Specific short courses or vocational training (e.g., Digiskills, NAVTTC, Coursera, Udemy). Must include:
          - Course Name.
          - Provider/Platform.
@@ -41,6 +50,8 @@ export const generateCareerGuidance = async (data: AssessmentData): Promise<Care
          - Cost (e.g., "Free", "Free (Digiskills)", "~5000 PKR", etc).
          - Brief Description (one sentence on what they will learn).
          - Link (URL to the course or provider home page).
+         - Format (Online / On-site / Hybrid).
+         - Difficulty Level (Beginner / Intermediate / Advanced).
       7. Freelancing potential (Upwork/Fiverr demand) or remote work opportunities.
       8. Estimated entry-level monthly salary range in PKR.
 
@@ -80,7 +91,18 @@ export const generateCareerGuidance = async (data: AssessmentData): Promise<Care
                         city: { type: Type.STRING },
                         sector: { type: Type.STRING, enum: ["Public", "Private"] },
                         website: { type: Type.STRING },
-                        feeRange: { type: Type.STRING }
+                        feeRange: { type: Type.STRING },
+                        ranking: { type: Type.STRING },
+                        recommendedPrograms: { 
+                          type: Type.ARRAY, 
+                          items: { type: Type.STRING },
+                          description: "Specific degree titles to apply for"
+                        },
+                        keySubjects: {
+                          type: Type.ARRAY,
+                          items: { type: Type.STRING },
+                          description: "Core subjects covered in the degree"
+                        }
                       }
                     }
                   },
@@ -94,7 +116,9 @@ export const generateCareerGuidance = async (data: AssessmentData): Promise<Care
                         duration: { type: Type.STRING },
                         cost: { type: Type.STRING },
                         description: { type: Type.STRING },
-                        link: { type: Type.STRING }
+                        link: { type: Type.STRING },
+                        format: { type: Type.STRING },
+                        level: { type: Type.STRING }
                       }
                     }
                   },
