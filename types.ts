@@ -75,6 +75,7 @@ export interface User {
 export enum AppView {
   LANDING = 'LANDING',
   AUTH = 'AUTH',
+  DASHBOARD = 'DASHBOARD',
   ASSESSMENT = 'ASSESSMENT',
   LOADING = 'LOADING',
   RESULTS = 'RESULTS',

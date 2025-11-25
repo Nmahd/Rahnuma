@@ -6,12 +6,13 @@ import { ArrowRight, ArrowLeft, CheckCircle2 } from 'lucide-react';
 interface AssessmentProps {
   onSubmit: (data: AssessmentData) => void;
   onCancel: () => void;
+  defaultName?: string;
 }
 
-const Assessment: React.FC<AssessmentProps> = ({ onSubmit, onCancel }) => {
+const Assessment: React.FC<AssessmentProps> = ({ onSubmit, onCancel, defaultName }) => {
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState<AssessmentData>({
-    name: '',
+    name: defaultName || '',
     city: 'Karachi',
     educationLevel: EDUCATION_LEVELS[0],
     majorSubjects: SUBJECT_OPTIONS[EDUCATION_LEVELS[0]][0],
@@ -58,7 +59,7 @@ const Assessment: React.FC<AssessmentProps> = ({ onSubmit, onCancel }) => {
   const currentSubjects = SUBJECT_OPTIONS[formData.educationLevel] || ["Other"];
 
   return (
-    <div className="max-w-2xl mx-auto bg-white rounded-2xl shadow-xl overflow-hidden border border-slate-100">
+    <div className="max-w-2xl mx-auto bg-white rounded-2xl shadow-xl overflow-hidden border border-slate-100 animate-fadeIn">
       {/* Progress Bar */}
       <div className="bg-slate-100 h-2 w-full">
         <div 

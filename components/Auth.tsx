@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { User } from '../types';
-import { Compass, Mail, Lock, User as UserIcon, ArrowRight, AlertCircle } from 'lucide-react';
+import { Compass, Mail, Lock, User as UserIcon, ArrowRight, AlertCircle, Info, AlertTriangle } from 'lucide-react';
 import { signInWithGoogle } from '../services/firebase';
 
 interface AuthProps {
@@ -15,6 +15,7 @@ const Auth: React.FC<AuthProps> = ({ onLogin, onCancel }) => {
   const [name, setName] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isDomainError, setIsDomainError] = useState(false);
 
   // Note: We are keeping the mock email/password login for now as Firebase Email/Pass 
   // requires more setup, but Google Sign In is fully integrated.
@@ -22,6 +23,7 @@ const Auth: React.FC<AuthProps> = ({ onLogin, onCancel }) => {
     e.preventDefault();
     setIsLoading(true);
     setError(null);
+    setIsDomainError(false);
     
     // Simulate API call for email/password
     setTimeout(() => {
@@ -37,6 +39,7 @@ const Auth: React.FC<AuthProps> = ({ onLogin, onCancel }) => {
   const handleGoogleLogin = async () => {
     setIsLoading(true);
     setError(null);
+    setIsDomainError(false);
     try {
       const firebaseUser = await signInWithGoogle();
       
@@ -50,8 +53,13 @@ const Auth: React.FC<AuthProps> = ({ onLogin, onCancel }) => {
       onLogin(appUser);
     } catch (err: any) {
       console.error(err);
-      if (err.message && err.message.includes("Firebase not initialized")) {
+      if (err.code === 'auth/unauthorized-domain') {
+        setIsDomainError(true);
+        setError("Domain Not Authorized");
+      } else if (err.message && err.message.includes("Firebase not initialized")) {
         setError("Firebase Configuration Missing. Please check env variables.");
+      } else if (err.code === 'auth/popup-closed-by-user') {
+        setError("Sign-in cancelled.");
       } else {
         setError("Failed to sign in with Google. Please try again.");
       }
@@ -62,7 +70,7 @@ const Auth: React.FC<AuthProps> = ({ onLogin, onCancel }) => {
 
   return (
     <div className="min-h-[calc(100vh-64px)] flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 bg-slate-50">
-      <div className="max-w-md w-full space-y-8 bg-white p-10 rounded-2xl shadow-xl border border-slate-100">
+      <div className="max-w-md w-full space-y-8 bg-white p-10 rounded-2xl shadow-xl border border-slate-100 animate-fadeIn">
         <div className="text-center">
           <div className="mx-auto h-12 w-12 bg-brand-100 rounded-full flex items-center justify-center">
             <Compass className="h-8 w-8 text-brand-600" />
@@ -75,12 +83,61 @@ const Auth: React.FC<AuthProps> = ({ onLogin, onCancel }) => {
           </p>
         </div>
 
-        {error && (
-          <div className="bg-red-50 text-red-600 p-3 rounded-lg text-sm flex items-center">
-            <AlertCircle size={16} className="mr-2 flex-shrink-0" />
-            {error}
+        {isDomainError ? (
+           <div className="bg-red-50 border-l-4 border-red-500 p-4 rounded-md">
+             <div className="flex">
+               <div className="flex-shrink-0">
+                 <AlertTriangle className="h-5 w-5 text-red-500" aria-hidden="true" />
+               </div>
+               <div className="ml-3">
+                 <h3 className="text-sm font-medium text-red-800">Authorization Error</h3>
+                 <div className="mt-2 text-sm text-red-700">
+                   <p>This domain is not authorized to use Google Sign-In.</p>
+                   <ul className="list-disc pl-5 space-y-1 mt-2">
+                     <li>Go to Firebase Console</li>
+                     <li>Select <strong>Authentication</strong> &gt; <strong>Settings</strong></li>
+                     <li>Click <strong>Authorized domains</strong></li>
+                     <li>Add <strong>rahnuma-career-guide.netlify.app</strong> (or your current domain)</li>
+                   </ul>
+                 </div>
+               </div>
+             </div>
+           </div>
+        ) : error && (
+          <div className="bg-red-50 text-red-600 p-4 rounded-lg text-sm flex items-start">
+            <AlertCircle size={16} className="mr-2 flex-shrink-0 mt-0.5" />
+            <span>{error}</span>
           </div>
         )}
+        
+        {/* Google Login - Primary Method */}
+        <div>
+          <button
+            onClick={handleGoogleLogin}
+            disabled={isLoading}
+            className="w-full flex items-center justify-center px-4 py-3 border border-slate-300 rounded-lg shadow-sm text-sm font-medium text-slate-700 bg-white hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-500 transition-colors"
+          >
+            {isLoading ? (
+               <div className="h-5 w-5 border-2 border-slate-300 border-t-brand-600 rounded-full animate-spin mr-3"></div>
+            ) : (
+              <img 
+                src="https://www.gstatic.com/images/branding/product/1x/g_logo_48px.png" 
+                alt="Google Logo" 
+                className="h-5 w-5 mr-3" 
+              />
+            )}
+            Continue with Google
+          </button>
+        </div>
+
+        <div className="relative">
+          <div className="absolute inset-0 flex items-center">
+            <div className="w-full border-t border-slate-300"></div>
+          </div>
+          <div className="relative flex justify-center text-sm">
+            <span className="px-2 bg-white text-slate-500">Or with email</span>
+          </div>
+        </div>
         
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           <div className="rounded-md shadow-sm space-y-4">
@@ -142,13 +199,10 @@ const Auth: React.FC<AuthProps> = ({ onLogin, onCancel }) => {
             <button
               type="submit"
               disabled={isLoading}
-              className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-brand-600 hover:bg-brand-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-500 transition-colors"
+              className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-slate-900 hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-500 transition-colors"
             >
               {isLoading ? (
-                <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
+                <div className="h-5 w-5 border-2 border-slate-500 border-t-white rounded-full animate-spin"></div>
               ) : (
                 <span className="flex items-center">
                   {isLogin ? 'Sign In' : 'Create Account'} <ArrowRight size={16} className="ml-2" />
@@ -157,30 +211,6 @@ const Auth: React.FC<AuthProps> = ({ onLogin, onCancel }) => {
             </button>
           </div>
         </form>
-
-        <div className="relative">
-          <div className="absolute inset-0 flex items-center">
-            <div className="w-full border-t border-slate-300"></div>
-          </div>
-          <div className="relative flex justify-center text-sm">
-            <span className="px-2 bg-white text-slate-500">Or continue with</span>
-          </div>
-        </div>
-
-        <div>
-          <button
-            onClick={handleGoogleLogin}
-            disabled={isLoading}
-            className="w-full flex items-center justify-center px-4 py-3 border border-slate-300 rounded-lg shadow-sm text-sm font-medium text-slate-700 bg-white hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-500 transition-colors"
-          >
-            <img 
-              src="https://www.gstatic.com/images/branding/product/1x/g_logo_48px.png" 
-              alt="Google Logo" 
-              className="h-5 w-5 mr-3" 
-            />
-            Continue with Google
-          </button>
-        </div>
 
         <div className="text-center">
           <button
