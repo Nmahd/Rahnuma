@@ -1,4 +1,3 @@
-
 import { initializeApp } from 'firebase/app';
 import { 
   getAuth, 
@@ -114,7 +113,10 @@ export const saveUserAssessment = async (userId: string, data: any) => {
   if (!db) return;
   try {
     await setDoc(doc(db, "user_assessments", userId), data, { merge: true });
-  } catch (error) {
+  } catch (error: any) {
+    if (error.code === 'permission-denied') {
+        console.error("FIRESTORE PERMISSION DENIED: Please update your Firestore Security Rules in the Firebase Console to allow authenticated writes.");
+    }
     console.error("Error saving assessment", error);
     throw error;
   }
@@ -131,7 +133,10 @@ export const getUserAssessment = async (userId: string) => {
     } else {
       return null;
     }
-  } catch (error) {
+  } catch (error: any) {
+    if (error.code === 'permission-denied') {
+        console.error("FIRESTORE PERMISSION DENIED: Please update your Firestore Security Rules in the Firebase Console to allow authenticated reads.");
+    }
     console.error("Error getting assessment", error);
     return null;
   }

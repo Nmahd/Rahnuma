@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Compass, Loader2, LogOut, LayoutDashboard, Mail, ArrowRight, ShieldCheck } from 'lucide-react';
 import { AppView, AssessmentData, CareerResponse, User } from './types';
@@ -39,7 +38,7 @@ const App: React.FC = () => {
               setCurrentAssessmentData(savedData.assessmentInput);
            }
         } catch (e) {
-          console.error("Error loading user data", e);
+          console.error("Error loading user data. Check Firestore Rules.", e);
         }
 
         // If user logs in while on Auth or Landing page, redirect to Dashboard
@@ -101,11 +100,19 @@ const App: React.FC = () => {
       setResults(response);
       
       // Save to Firestore if user is logged in
+      // We wrap this in a separate try/catch so database permission errors 
+      // DON'T block the user from seeing their results.
       if (user && user.uid) {
-         await saveUserAssessment(user.uid, {
-            results: response,
-            assessmentInput: data
-         });
+         try {
+           await saveUserAssessment(user.uid, {
+              results: response,
+              assessmentInput: data
+           });
+         } catch (saveError: any) {
+           console.error("Failed to save result to Firestore:", saveError);
+           // We silently fail here (or log to console) because showing the result 
+           // to the user is more important than saving it.
+         }
       }
       
       setView(AppView.RESULTS);
