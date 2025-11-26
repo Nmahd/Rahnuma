@@ -1,12 +1,13 @@
 
 import React, { useState, useEffect } from 'react';
-import { Compass, Loader2, LogOut, User as UserIcon, LayoutDashboard, Sparkles, CheckCircle2, ShieldCheck, Mail, ArrowRight } from 'lucide-react';
+import { Compass, Loader2, LogOut, LayoutDashboard, Mail, ArrowRight, ShieldCheck } from 'lucide-react';
 import { AppView, AssessmentData, CareerResponse, User } from './types';
 import { generateCareerGuidance } from './services/geminiService';
-import { subscribeToAuthChanges, logoutUser } from './services/firebase';
+import { subscribeToAuthChanges, logoutUser, getUserAssessment, saveUserAssessment } from './services/firebase';
 import Assessment from './components/Assessment';
 import Results from './components/Results';
 import Auth from './components/Auth';
+import LandingPage from './components/LandingPage';
 
 const App: React.FC = () => {
   const [view, setView] = useState<AppView>(AppView.LANDING);
@@ -14,38 +15,41 @@ const App: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [user, setUser] = useState<User | null>(null);
   const [errorMsg, setErrorMsg] = useState<string>('');
-
-  // Load results from local storage on mount
-  useEffect(() => {
-    const savedResults = localStorage.getItem('rahnuma_results');
-    if (savedResults) {
-      try {
-        setResults(JSON.parse(savedResults));
-        // Only set view to RESULTS if we have data AND we aren't in another specific state like Loading or Error
-        // We'll let the auth check below handle the initial redirect logic
-      } catch (e) {
-        console.error("Failed to parse saved results");
-      }
-    }
-  }, []);
+  
+  // Keep track of assessment data so user can edit it
+  const [currentAssessmentData, setCurrentAssessmentData] = useState<AssessmentData | undefined>(undefined);
 
   // Listen for Firebase Auth changes
   useEffect(() => {
-    const unsubscribe = subscribeToAuthChanges((firebaseUser) => {
+    const unsubscribe = subscribeToAuthChanges(async (firebaseUser) => {
       if (firebaseUser) {
-        setUser({
+        const loggedInUser = {
           name: firebaseUser.displayName || firebaseUser.email?.split('@')[0] || 'User',
           email: firebaseUser.email || '',
-          avatar: firebaseUser.photoURL || undefined
-        });
+          avatar: firebaseUser.photoURL || undefined,
+          uid: firebaseUser.uid
+        };
+        setUser(loggedInUser);
         
+        // Load saved data from Firestore
+        try {
+           const savedData = await getUserAssessment(firebaseUser.uid);
+           if (savedData) {
+              setResults(savedData.results);
+              setCurrentAssessmentData(savedData.assessmentInput);
+           }
+        } catch (e) {
+          console.error("Error loading user data", e);
+        }
+
         // If user logs in while on Auth or Landing page, redirect to Dashboard
         if (view === AppView.AUTH || view === AppView.LANDING) {
-           // If we have saved results, maybe go there? For now, stick to Dashboard for better UX flow
            setView(AppView.DASHBOARD);
         }
       } else {
         setUser(null);
+        setResults(null);
+        setCurrentAssessmentData(undefined);
         // If logged out and on protected views, redirect to Landing
         if (view === AppView.DASHBOARD || view === AppView.ASSESSMENT || view === AppView.RESULTS) {
           setView(AppView.LANDING);
@@ -60,6 +64,11 @@ const App: React.FC = () => {
     if (!user) {
       setView(AppView.AUTH);
     } else {
+      // Clear previous results if starting fresh, but maybe keep input if editing? 
+      // handleStart usually implies fresh, but let's see. 
+      // If we want fresh, we should clear currentAssessmentData, unless we want to remember last input.
+      // Let's keep last input as default for better UX, but usually "Start New" implies reset.
+      // But here we rely on the Assessment component to handle defaults or passed props.
       setView(AppView.ASSESSMENT);
     }
   };
@@ -71,9 +80,10 @@ const App: React.FC = () => {
 
   const handleLogout = async () => {
     await logoutUser();
-    localStorage.removeItem('rahnuma_results'); // Clear data on logout
+    localStorage.removeItem('rahnuma_results'); // Clear local backup
     setUser(null);
     setResults(null);
+    setCurrentAssessmentData(undefined);
     setView(AppView.LANDING);
   };
 
@@ -81,13 +91,23 @@ const App: React.FC = () => {
     setLoading(true);
     setView(AppView.LOADING);
     setErrorMsg('');
+    setCurrentAssessmentData(data); // Save the input data
+
     try {
       // Pass the user name to the prompt for better personalization
       const dataWithUser = { ...data, name: user?.name || data.name };
       const response = await generateCareerGuidance(dataWithUser);
       
       setResults(response);
-      localStorage.setItem('rahnuma_results', JSON.stringify(response)); // Save to local storage
+      
+      // Save to Firestore if user is logged in
+      if (user && user.uid) {
+         await saveUserAssessment(user.uid, {
+            results: response,
+            assessmentInput: data
+         });
+      }
+      
       setView(AppView.RESULTS);
     } catch (error: any) {
       console.error(error);
@@ -100,7 +120,12 @@ const App: React.FC = () => {
 
   const handleReset = () => {
     setResults(null);
-    localStorage.removeItem('rahnuma_results');
+    setCurrentAssessmentData(undefined); // Clear stored input for a truly fresh start
+    setView(AppView.ASSESSMENT);
+  };
+
+  const handleEditAssessment = () => {
+    // Go back to assessment but keep the current data
     setView(AppView.ASSESSMENT);
   };
 
@@ -159,44 +184,7 @@ const App: React.FC = () => {
       {/* Main Content */}
       <main className="flex-grow">
         {view === AppView.LANDING && (
-          <div className="relative isolate overflow-hidden">
-            <div className="mx-auto max-w-7xl px-6 pb-24 pt-10 sm:pb-32 lg:flex lg:px-8 lg:py-40">
-              <div className="mx-auto max-w-2xl lg:mx-0 lg:max-w-xl lg:flex-shrink-0 lg:pt-8 animate-fadeIn">
-                <div className="mt-24 sm:mt-32 lg:mt-16">
-                  <span className="inline-flex items-center rounded-full bg-brand-50 px-3 py-1 text-sm font-medium text-brand-600 ring-1 ring-inset ring-brand-500/10">
-                    <Sparkles size={14} className="mr-1" /> AI-Powered Career Counseling
-                  </span>
-                </div>
-                <h1 className="mt-10 text-4xl font-bold tracking-tight text-slate-900 sm:text-6xl">
-                  Confused about your <span className="text-brand-600">future?</span>
-                </h1>
-                <p className="mt-6 text-lg leading-8 text-slate-600">
-                  Rahnuma helps students in Pakistan discover their perfect career path. 
-                  Get personalized advice on universities, short courses, and freelancing opportunities tailored to your skills and interests.
-                </p>
-                <div className="mt-10 flex items-center gap-x-6">
-                  <button 
-                    onClick={() => setView(AppView.AUTH)}
-                    className="rounded-full bg-brand-600 px-8 py-3.5 text-sm font-semibold text-white shadow-lg shadow-brand-500/30 hover:bg-brand-500 hover:shadow-brand-500/50 transition-all hover:-translate-y-1"
-                  >
-                    Get Started
-                  </button>
-                  <a href="#" className="text-sm font-semibold leading-6 text-slate-900 hover:text-brand-600 transition-colors">
-                    Learn more <span aria-hidden="true">→</span>
-                  </a>
-                </div>
-              </div>
-              <div className="mx-auto mt-16 flex max-w-2xl sm:mt-24 lg:ml-10 lg:mt-0 lg:mr-0 lg:max-w-none lg:flex-none xl:ml-32 animate-slideUp">
-                 <div className="max-w-3xl flex-none sm:max-w-5xl lg:max-w-none">
-                    <img 
-                      src="https://images.unsplash.com/photo-1523240795612-9a054b0db644?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1740&q=80" 
-                      alt="Students discussing" 
-                      className="w-[30rem] rounded-2xl bg-gray-50 shadow-2xl ring-1 ring-gray-900/10 lg:w-[40rem]"
-                    />
-                 </div>
-              </div>
-            </div>
-          </div>
+          <LandingPage onStart={handleStart} user={user} />
         )}
         
         {view === AppView.AUTH && (
@@ -241,7 +229,10 @@ const App: React.FC = () => {
                     </p>
                     <div className="flex gap-4">
                       <button 
-                        onClick={handleStart}
+                        onClick={() => {
+                          setCurrentAssessmentData(undefined); // Ensure fresh start
+                          setView(AppView.ASSESSMENT);
+                        }}
                         className="bg-white text-brand-700 hover:bg-brand-50 px-8 py-4 rounded-xl font-bold shadow-md transition-all hover:translate-x-1 flex items-center"
                       >
                         Start New Assessment <ArrowRight size={20} className="ml-2" />
@@ -265,14 +256,18 @@ const App: React.FC = () => {
         {view === AppView.ASSESSMENT && (
           <div className="py-12 px-4 sm:px-6">
             <div className="max-w-3xl mx-auto mb-8 text-center">
-              <h2 className="text-3xl font-bold text-slate-900">Let's build your profile</h2>
-              <p className="text-slate-600 mt-2">We'll need some details to provide the best recommendations.</p>
+              <h2 className="text-3xl font-bold text-slate-900">
+                {currentAssessmentData ? "Review & Edit Your Profile" : "Let's build your profile"}
+              </h2>
+              <p className="text-slate-600 mt-2">
+                {currentAssessmentData ? "Make changes below to update your recommendations." : "We'll need some details to provide the best recommendations."}
+              </p>
             </div>
-            {/* Pass user name to pre-fill the form */}
             <Assessment 
               onSubmit={handleAssessmentSubmit} 
               onCancel={() => setView(user ? AppView.DASHBOARD : AppView.LANDING)} 
               defaultName={user?.name}
+              initialData={currentAssessmentData}
             />
           </div>
         )}
@@ -294,7 +289,11 @@ const App: React.FC = () => {
 
         {view === AppView.RESULTS && results && (
           <div className="py-8 px-4 sm:px-6">
-             <Results data={results} onReset={handleReset} />
+             <Results 
+               data={results} 
+               onReset={handleReset} 
+               onEdit={handleEditAssessment} 
+             />
           </div>
         )}
         

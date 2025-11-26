@@ -19,16 +19,18 @@ import {
   Youtube,
   Star,
   Users,
-  Lightbulb
+  Lightbulb,
+  Edit2
 } from 'lucide-react';
 import UniversityComparison from './UniversityComparison';
 
 interface ResultsProps {
   data: CareerResponse;
   onReset: () => void;
+  onEdit: () => void;
 }
 
-const Results: React.FC<ResultsProps> = ({ data, onReset }) => {
+const Results: React.FC<ResultsProps> = ({ data, onReset, onEdit }) => {
   const [comparisonList, setComparisonList] = useState<University[]>([]);
   const [showComparison, setShowComparison] = useState(false);
 
@@ -89,7 +91,14 @@ const Results: React.FC<ResultsProps> = ({ data, onReset }) => {
         </div>
       </div>
 
-      <div className="flex justify-center mt-12">
+      <div className="flex justify-center mt-12 gap-4">
+        <button 
+          onClick={onEdit}
+          className="px-6 py-3 bg-white text-slate-700 border border-slate-300 rounded-full font-medium hover:bg-slate-50 transition shadow-sm flex items-center"
+        >
+          <Edit2 size={16} className="mr-2" />
+          Edit Profile
+        </button>
         <button 
           onClick={onReset}
           className="px-8 py-3 bg-slate-900 text-white rounded-full font-medium hover:bg-slate-800 transition shadow-lg hover:-translate-y-0.5"

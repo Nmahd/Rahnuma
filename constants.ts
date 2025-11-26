@@ -40,7 +40,8 @@ export const SUBJECT_OPTIONS: Record<string, string[]> = {
     "Science (Biology)",
     "Science (Computer Science)",
     "Arts / Humanities",
-    "Technical Group"
+    "Technical Group",
+    "Other"
   ],
   "Class 11-12 (Inter/A-Levels)": [
     "Pre-Engineering",
@@ -50,7 +51,8 @@ export const SUBJECT_OPTIONS: Record<string, string[]> = {
     "FA (Arts / Humanities)",
     "FA (General Science)",
     "A-Levels (Science)",
-    "A-Levels (Business/Humanities)"
+    "A-Levels (Business/Humanities)",
+    "Other"
   ],
   "Undergraduate (University)": [
     "Computer Science (CS) / SE / IT",
@@ -74,7 +76,8 @@ export const SUBJECT_OPTIONS: Record<string, string[]> = {
     "Agriculture / Food Science",
     "Biotechnology / Microbiology",
     "Environmental Science",
-    "Mathematics / Statistics / Physics"
+    "Mathematics / Statistics / Physics",
+    "Other"
   ],
   "Graduated": [
     "Computer Science / AI / Cyber Security",
@@ -93,7 +96,8 @@ export const SUBJECT_OPTIONS: Record<string, string[]> = {
     "Data Science / Analytics",
     "Agriculture / Agribusiness",
     "Law (LLM)",
-    "Natural Sciences (Bio/Chem/Phy)"
+    "Natural Sciences (Bio/Chem/Phy)",
+    "Other"
   ],
   "Diploma / Vocational": [
     "DAE (Civil)",
@@ -106,7 +110,8 @@ export const SUBJECT_OPTIONS: Record<string, string[]> = {
     "Culinary Arts / Hotel Management",
     "Auto Mechanic / HVAC",
     "Electrician / Plumbing",
-    "Beautician / Cosmetology"
+    "Beautician / Cosmetology",
+    "Other"
   ]
 };
 

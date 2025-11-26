@@ -4,6 +4,7 @@ export interface AssessmentData {
   city: string;
   educationLevel: string; // e.g., Matric, Intermediate, Bachelors
   majorSubjects: string; // e.g., Pre-Medical, ICS, Arts
+  customSubject?: string; // For manual input if "Other" is selected
   interests: string[]; // e.g., Technology, Art, Writing
   hobbies: string;
   workPreference: string; // e.g., Remote, Field, Office

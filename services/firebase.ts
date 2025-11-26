@@ -11,6 +11,7 @@ import {
   onAuthStateChanged,
   User as FirebaseUser
 } from 'firebase/auth';
+import { getFirestore, doc, setDoc, getDoc } from 'firebase/firestore';
 
 // Helper to get env vars safely (supports Vite and standard process.env)
 const getEnv = (key: string) => {
@@ -38,12 +39,14 @@ const firebaseConfig = {
 
 // Initialize Firebase
 let auth: any = null;
+let db: any = null;
 
 try {
   // Simple check to ensure config is present before initializing to avoid nasty crash loops
   if (firebaseConfig.apiKey) {
     const app = initializeApp(firebaseConfig);
     auth = getAuth(app);
+    db = getFirestore(app);
   } else {
     console.warn("Firebase configuration missing. Please check VITE_FIREBASE_API_KEY environment variable.");
   }
@@ -105,4 +108,31 @@ export const subscribeToAuthChanges = (callback: (user: FirebaseUser | null) => 
     return () => {};
   }
   return onAuthStateChanged(auth, callback);
+};
+
+export const saveUserAssessment = async (userId: string, data: any) => {
+  if (!db) return;
+  try {
+    await setDoc(doc(db, "user_assessments", userId), data, { merge: true });
+  } catch (error) {
+    console.error("Error saving assessment", error);
+    throw error;
+  }
+};
+
+export const getUserAssessment = async (userId: string) => {
+  if (!db) return null;
+  try {
+    const docRef = doc(db, "user_assessments", userId);
+    const docSnap = await getDoc(docRef);
+
+    if (docSnap.exists()) {
+      return docSnap.data();
+    } else {
+      return null;
+    }
+  } catch (error) {
+    console.error("Error getting assessment", error);
+    return null;
+  }
 };

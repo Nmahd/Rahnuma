@@ -40,6 +40,11 @@ export const generateCareerGuidance = async (data: AssessmentData): Promise<Care
   // Initialize Gemini Client
   const ai = new GoogleGenAI({ apiKey: apiKey });
 
+  // Use custom subject if "Other" is selected
+  const actualMajor = data.majorSubjects === 'Other' && data.customSubject 
+    ? data.customSubject 
+    : data.majorSubjects;
+
   try {
     const prompt = `
       Act as an expert career counselor for a student in Pakistan.
@@ -48,7 +53,7 @@ export const generateCareerGuidance = async (data: AssessmentData): Promise<Care
       - Name: ${data.name}
       - City: ${data.city}
       - Current Education: ${data.educationLevel}
-      - Major/Stream: ${data.majorSubjects}
+      - Major/Stream: ${actualMajor}
       - Key Interests: ${data.interests.join(", ")}
       - Hobbies: ${data.hobbies}
       - Work Preference: ${data.workPreference}
