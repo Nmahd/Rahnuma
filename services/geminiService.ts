@@ -47,7 +47,7 @@ export const generateCareerGuidance = async (data: AssessmentData): Promise<Care
 
   try {
     const prompt = `
-      Act as an expert career counselor for a student in Pakistan.
+      Act as a Senior Career Data Analyst and Counselor for the Pakistani job market.
       
       User Profile:
       - Name: ${data.name}
@@ -60,52 +60,38 @@ export const generateCareerGuidance = async (data: AssessmentData): Promise<Care
       - Financial Goal: ${data.financialGoal}
       - Budget Constraint: ${data.budgetRange}
 
-      Task:
-      Based on this profile and their budget, suggest 3 distinct career paths.
-      
-      IMPORTANT:
-      When suggesting universities, YOU MUST PRIORITIZE universities located in **${data.city}**. 
-      If there are good universities for the career path in ${data.city}, list them first. 
-      Only suggest universities in other cities if they are significantly better (e.g. LUMS, NUST, GIKI) or if options in ${data.city} are limited.
-      
-      For each path, provide:
-      1. A relevant title.
-      2. A match score (0-100) based on their interests.
-      3. A description of why this fits.
-      4. A step-by-step roadmap (education + skills) suitable for the Pakistani context.
-      5. **Required Skills**: List 5 specific technical or soft skills they need to master for this career.
-      6. Top universities in Pakistan fitting the budget. Must include:
-         - Name (e.g., NUST, LUMS, UET, IBA).
-         - City.
-         - Sector (Public/Private).
-         - Official Website URL (ensure it is correct or provide the main domain).
-         - Approximate Fee Range (per semester in PKR). Make sure this fits the user's budget constraint if possible.
-         - Approximate Ranking or Tier (e.g., "Top 5 in Pakistan", "Tier 1", "Best for CS in ${data.city}").
-         - Recommended Programs: List 2-3 specific degree titles they should apply for (e.g., "BS Software Engineering", "BBA").
-         - Key Subjects: A brief list of 3-5 core subjects they will study (e.g., "Programming, Calculus, Algorithms").
-      7. Specific short courses or vocational training (e.g., Digiskills, NAVTTC, Coursera, Udemy). Must include:
-         - Course Name.
-         - Provider/Platform.
-         - Duration.
-         - Cost (e.g., "Free", "Free (Digiskills)", "~5000 PKR", etc).
-         - Brief Description (one sentence on what they will learn).
-         - Link (URL to the course or provider home page).
-         - Format (Online / On-site / Hybrid).
-         - Difficulty Level (Beginner / Intermediate / Advanced).
-      8. **Free YouTube Learning**: Suggest 2-3 specific FREE courses or playlists on YouTube.
-         - Title of the series/playlist.
-         - Channel Name (e.g., "CodeWithHarry", "GFXMentor", "Azad Chaiwala").
-         - URL (link to the channel or playlist).
-      9. **Inspiration & Role Models**: Suggest 2 famous personalities (Pakistani or Global) in this field.
-         - Name.
-         - Role/Title (e.g., "CEO of Netsol", "Founder of Tesla").
-         - Context (1 sentence on why they are a role model for this specific career).
-      10. Freelancing potential (Upwork/Fiverr demand) or remote work opportunities.
-      11. Estimated entry-level monthly salary range in PKR.
-      12. **Numeric Salary Data**: Provide 'salaryMin' and 'salaryMax' as numbers (e.g., 50000 and 80000).
-      13. **Market Demand Score**: A score from 0-100.
+      **TASK: DEEP MARKET RESEARCH & CAREER MATCHING**
+      Perform a deep analysis of the current employment trends in Pakistan (2024-2025). 
+      Identify 3 distinct, high-potential career paths that perfectly match the user's profile and budget.
 
-      Also provide a short overall analysis of the profile.
+      **CRITICAL DATA REQUIREMENTS (DO NOT SKIP):**
+      You MUST provide detailed data for every single field below. **Null or empty values are strictly forbidden.**
+
+      1. **Path Title**: Specific job role (e.g., "MERN Stack Developer", "Digital Marketing Specialist", "Petroleum Engineer").
+      2. **Match Score**: A precise number (0-100) reflecting how well this fits their specific interests.
+      3. **Roadmap**: A detailed, step-by-step actionable plan. MUST contain at least 5-6 distinct steps (e.g., "Step 1: Learn HTML/CSS", "Step 2: Enrol in BS CS at X University", "Step 3: Build Portfolio").
+      4. **Top Skills**: List exactly 6-8 specific technical and soft skills required for success (e.g., "Python", "SEO", "Public Speaking", "React.js").
+      5. **Market Demand**: An integer score (0-100) based on current job openings on LinkedIn/Indeed Pakistan.
+      6. **Salary Data**: 
+         - 'estimatedSalaryRangePKR': A string like "60,000 - 90,000 PKR".
+         - 'salaryMin': A raw number (e.g. 60000).
+         - 'salaryMax': A raw number (e.g. 90000).
+         *Base these on realistic entry-level salaries in ${data.city}.*
+
+      7. **Universities (Strict Location Priority)**:
+         - PRIORITIZE universities in **${data.city}**.
+         - Only suggest universities in other cities if they are Top Tier (LUMS, NUST, IBA, GIKI).
+         - Include **Fee Range** (per semester) and **Ranking**.
+         - **Key Subjects**: List 3-4 specific subjects they will study.
+         - **Recommended Programs**: List specific degree titles.
+
+      8. **Short Courses**: Suggest 2-3 specific certification/diploma courses (e.g., from Coursera, Udemy, Digiskills, NAVTTC).
+         - Include **Cost**, **Duration**, and **Provider**.
+
+      9. **YouTube Learning**: 2-3 specific FREE resources/channels.
+      10. **Role Models**: 2 famous figures in the field.
+
+      Output must be valid JSON matching the schema exactly.
     `;
 
     const response = await ai.models.generateContent({
@@ -115,6 +101,7 @@ export const generateCareerGuidance = async (data: AssessmentData): Promise<Care
         responseMimeType: "application/json",
         responseSchema: {
           type: Type.OBJECT,
+          required: ["analysis", "recommendations"],
           properties: {
             analysis: {
               type: Type.STRING,
@@ -124,6 +111,7 @@ export const generateCareerGuidance = async (data: AssessmentData): Promise<Care
               type: Type.ARRAY,
               items: {
                 type: Type.OBJECT,
+                required: ["title", "matchScore", "description", "roadmap", "skills", "marketDemand", "salaryMin", "salaryMax", "estimatedSalaryRangePKR", "universities", "shortCourses", "youtubeCourses", "roleModels", "freelancePotential"],
                 properties: {
                   title: { type: Type.STRING },
                   matchScore: { type: Type.NUMBER },
@@ -137,6 +125,11 @@ export const generateCareerGuidance = async (data: AssessmentData): Promise<Care
                     items: { type: Type.STRING },
                     description: "List of key skills required for this career"
                   },
+                  marketDemand: { type: Type.NUMBER },
+                  salaryMin: { type: Type.NUMBER },
+                  salaryMax: { type: Type.NUMBER },
+                  estimatedSalaryRangePKR: { type: Type.STRING },
+                  freelancePotential: { type: Type.STRING },
                   universities: {
                     type: Type.ARRAY,
                     items: {
@@ -196,12 +189,7 @@ export const generateCareerGuidance = async (data: AssessmentData): Promise<Care
                         context: { type: Type.STRING }
                       }
                     }
-                  },
-                  freelancePotential: { type: Type.STRING },
-                  estimatedSalaryRangePKR: { type: Type.STRING },
-                  salaryMin: { type: Type.NUMBER },
-                  salaryMax: { type: Type.NUMBER },
-                  marketDemand: { type: Type.NUMBER }
+                  }
                 }
               }
             }
